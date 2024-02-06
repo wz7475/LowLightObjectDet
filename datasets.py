@@ -40,47 +40,74 @@ class CustomDataset(Dataset):
         image_resized /= 255.0
         
         # Capture the corresponding XML file for getting the annotations.
-        annot_filename = os.path.splitext(image_name)[0] + '.xml'
+        annot_filename = image_name + ".txt"
         annot_file_path = os.path.join(self.dir_path, annot_filename)
         
         boxes = []
         labels = []
-        tree = et.parse(annot_file_path)
-        root = tree.getroot()
-        
+
         # Original image width and height.
         image_width = image.shape[1]
         image_height = image.shape[0]
-        
+
+        with open(annot_file_path, 'r') as file:
+            lines = file.readlines()
+            lines = [line.strip() for line in lines[1:]]
+            for line in lines:
+                object_info = line.split(" ")
+                labels.append(self.classes.index(object_info[0]))
+
+                l = float(object_info[1])
+                t = float(object_info[2])
+                w = float(object_info[3])
+                h = float(object_info[4])
+                xmin = l
+                ymin = t
+                xmax = l + w
+                ymax = t + h
+
+                xmin_final = (xmin / image_width) * self.width
+                xmax_final = (xmax / image_width) * self.width
+                ymin_final = (ymin / image_height) * self.height
+                ymax_final = (ymax / image_height) * self.height
+
+                # Check that all coordinates are within the image.
+                if xmax_final > self.width:
+                    xmax_final = self.width
+                if ymax_final > self.height:
+                    ymax_final = self.height
+
+                boxes.append([xmin_final, ymin_final, xmax_final, ymax_final])
+
         # Box coordinates for xml files are extracted 
         # and corrected for image size given.
-        for member in root.findall('object'):
-            # Get label and map the `classes`.
-            labels.append(self.classes.index(member.find('name').text))
-            
-            # Left corner x-coordinates.
-            xmin = int(member.find('bndbox').find('xmin').text)
-            # Right corner x-coordinates.
-            xmax = int(member.find('bndbox').find('xmax').text)
-            # Left corner y-coordinates.
-            ymin = int(member.find('bndbox').find('ymin').text)
-            # Right corner y-coordinates.
-            ymax = int(member.find('bndbox').find('ymax').text)
-            
-            # Resize the bounding boxes according 
-            # to resized image `width`, `height`.
-            xmin_final = (xmin/image_width)*self.width
-            xmax_final = (xmax/image_width)*self.width
-            ymin_final = (ymin/image_height)*self.height
-            ymax_final = (ymax/image_height)*self.height
-
-            # Check that all coordinates are within the image.
-            if xmax_final > self.width:
-                xmax_final = self.width
-            if ymax_final > self.height:
-                ymax_final = self.height
-            
-            boxes.append([xmin_final, ymin_final, xmax_final, ymax_final])
+        # for member in root.findall('object'):
+        #     # Get label and map the `classes`.
+        #     labels.append(self.classes.index(member.find('name').text))
+        #
+        #     # Left corner x-coordinates.
+        #     xmin = int(member.find('bndbox').find('xmin').text)
+        #     # Right corner x-coordinates.
+        #     xmax = int(member.find('bndbox').find('xmax').text)
+        #     # Left corner y-coordinates.
+        #     ymin = int(member.find('bndbox').find('ymin').text)
+        #     # Right corner y-coordinates.
+        #     ymax = int(member.find('bndbox').find('ymax').text)
+        #
+        #     # Resize the bounding boxes according
+        #     # to resized image `width`, `height`.
+        #     xmin_final = (xmin/image_width)*self.width
+        #     xmax_final = (xmax/image_width)*self.width
+        #     ymin_final = (ymin/image_height)*self.height
+        #     ymax_final = (ymax/image_height)*self.height
+        #
+        #     # Check that all coordinates are within the image.
+        #     if xmax_final > self.width:
+        #         xmax_final = self.width
+        #     if ymax_final > self.height:
+        #         ymax_final = self.height
+        #
+        #     boxes.append([xmin_final, ymin_final, xmax_final, ymax_final])
         
         # Bounding box to tensor.
         boxes = torch.as_tensor(boxes, dtype=torch.float32)
@@ -185,5 +212,5 @@ if __name__ == '__main__':
         
     NUM_SAMPLES_TO_VISUALIZE = 4
     for i in range(NUM_SAMPLES_TO_VISUALIZE):
-        image, target = dataset[i]
+        image, target = dataset[i+1]
         visualize_sample(image, target)

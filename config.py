@@ -8,14 +8,12 @@ NUM_WORKERS = 4 # Number of parallel workers for data loading.
 DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
 # Training images and XML files directory.
-TRAIN_DIR = 'data/License Plate Recognition.v1-raw-images.voc/train'
+TRAIN_DIR = 'data/ExDark/splitted/train'
 # Validation images and XML files directory.
-VALID_DIR = 'data/License Plate Recognition.v1-raw-images.voc/valid'
+VALID_DIR = 'data/ExDark/splitted/va'
 
-# Classes: 0 index is reserved for background.
-CLASSES = [
-    '__background__', 'License_Plate'
-]
+
+CLASSES = ["__background__", 'Bicycle', 'Boat', 'Bottle', 'Bus', 'Car', 'Cat', 'Chair', 'Cup', 'Dog', 'Motorbike', 'People', 'Table']
 
 NUM_CLASSES = len(CLASSES)
 
