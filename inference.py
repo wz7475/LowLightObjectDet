@@ -37,6 +37,17 @@ args = vars(parser.parse_args())
 os.makedirs('inference_outputs/images', exist_ok=True)
 
 COLORS = [[0, 0, 0], [255, 0, 0]]
+COLORS.append([255, 255, 0])  # Yellow
+COLORS.append([0, 255, 0])  # Green
+COLORS.append([0, 255, 255])  # Cyan
+COLORS.append([255, 0, 255])  # Magenta
+COLORS.append([128, 0, 0])  # Maroon
+COLORS.append([128, 128, 0])  # Olive
+COLORS.append([0, 128, 0])  # Dark Green
+COLORS.append([128, 0, 128])  # Purple
+COLORS.append([0, 128, 128])  # Teal
+COLORS.append([192, 192, 192])  # Silver
+COLORS.append([128, 128, 128])  # Gray
 
 # Load the best model and trained weights.
 model = create_model(num_classes=NUM_CLASSES, size=640)
@@ -118,7 +129,7 @@ for i in range(len(test_images)):
                         lineType=cv2.LINE_AA)
 
         cv2.imshow('Prediction', orig_image)
-        cv2.waitKey(1)
+        cv2.waitKey(0)
         cv2.imwrite(f"inference_outputs/images/{image_name}.jpg", orig_image)
     print(f"Image {i+1} done...")
     print('-'*50)

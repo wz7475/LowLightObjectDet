@@ -31,6 +31,7 @@ class CustomDataset(Dataset):
     def __getitem__(self, idx):
         # Capture the image name and the full image path.
         image_name = self.all_images[idx]
+        image_name = image_name
         image_path = os.path.join(self.dir_path, image_name)
 
         # Read and preprocess the image.
@@ -40,7 +41,7 @@ class CustomDataset(Dataset):
         image_resized /= 255.0
         
         # Capture the corresponding XML file for getting the annotations.
-        annot_filename = image_name + ".txt"
+        annot_filename = image_name.lower() + ".txt"
         annot_file_path = os.path.join(self.dir_path, annot_filename)
         
         boxes = []
@@ -110,7 +111,17 @@ class CustomDataset(Dataset):
         #     boxes.append([xmin_final, ymin_final, xmax_final, ymax_final])
         
         # Bounding box to tensor.
+        for i, box in enumerate(boxes):
+            # Clipping the bounding box coordinates to ensure they are within [0, width] and [0, height] for x and y, respectively.
+            xmin_clipped = np.clip(box[0], 0, self.width)
+            ymin_clipped = np.clip(box[1], 0, self.height)
+            xmax_clipped = np.clip(box[2], 0, self.width)
+            ymax_clipped = np.clip(box[3], 0, self.height)
+
+            # Update the box with clipped values
+            boxes[i] = [xmin_clipped, ymin_clipped, xmax_clipped, ymax_clipped]
         boxes = torch.as_tensor(boxes, dtype=torch.float32)
+
         # Area of the bounding boxes.
         area = (boxes[:, 3] - boxes[:, 1]) * (boxes[:, 2] - boxes[:, 0]) if len(boxes) > 0 \
             else torch.as_tensor(boxes, dtype=torch.float32)
@@ -180,6 +191,9 @@ def create_valid_loader(valid_dataset, num_workers=0):
 # Terminal to visualize sample images
 # USAGE: python datasets.py
 if __name__ == '__main__':
+    debug_save = "debug_save"
+    if not os.path.exists(debug_save):
+        os.makedirs(debug_save)
     # sanity check of the Dataset pipeline with sample visualization
     dataset = CustomDataset(
         TRAIN_DIR, RESIZE_TO, RESIZE_TO, CLASSES
@@ -187,11 +201,15 @@ if __name__ == '__main__':
     print(f"Number of training images: {len(dataset)}")
     
     # function to visualize a single sample
-    def visualize_sample(image, target):
+    def visualize_sample(image, target, idx):
         for box_num in range(len(target['boxes'])):
             box = target['boxes'][box_num]
             label = CLASSES[target['labels'][box_num]]
-            image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+            try:
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            except:
+                image = cv2.cvtColor(image.detach().cpu().numpy(), cv2.COLOR_RGB2BGR)
+
             cv2.rectangle(
                 image, 
                 (int(box[0]), int(box[1])), (int(box[2]), int(box[3])),
@@ -207,10 +225,13 @@ if __name__ == '__main__':
                 (0, 0, 255), 
                 2
             )
+        # save the image
+        cv2.imwrite(f'{debug_save}/sample{idx}.jpg', image)
         cv2.imshow('Image', image)
         cv2.waitKey(0)
-        
-    NUM_SAMPLES_TO_VISUALIZE = 4
+        # cv2.destroyAllWindows()
+    NUM_SAMPLES_TO_VISUALIZE = len(dataset)
     for i in range(NUM_SAMPLES_TO_VISUALIZE):
-        image, target = dataset[i+1]
-        visualize_sample(image, target)
+        image, target = dataset[i]
+        print(f"Sample {i+1}: {image.shape}")
+        visualize_sample(image, target, i)
