@@ -5,7 +5,7 @@ import torch
 import matplotlib.pyplot as plt
 
 from albumentations.pytorch import ToTensorV2
-from config import DEVICE, CLASSES
+from config import DEVICE, CLASSES_EXDARK
 
 plt.style.use('ggplot')
 
@@ -112,8 +112,8 @@ def show_tranformed_image(train_loader):
                             (box[0], box[1]),
                             (box[2], box[3]),
                             (0, 0, 255), 2)
-                cv2.putText(sample, CLASSES[labels[box_num]], 
-                            (box[0], box[1]-10), cv2.FONT_HERSHEY_SIMPLEX, 
+                cv2.putText(sample, CLASSES_EXDARK[labels[box_num]],
+                            (box[0], box[1]-10), cv2.FONT_HERSHEY_SIMPLEX,
                             1.0, (0, 0, 255), 2)
             cv2.imshow('Transformed image', sample)
             cv2.waitKey(0)
@@ -171,3 +171,12 @@ def save_mAP(OUT_DIR, map_05, map):
     ax.set_ylabel('mAP')
     ax.legend()
     figure.savefig(f"{OUT_DIR}/map.png")
+
+
+def convert_coco_to_exdark(labels: torch.Tensor):
+    """
+    Converts the COCO labels to ExDark labels.
+    """
+    for i in range(len(labels)):
+        labels[i] = CLASSES_EXDARK.index(labels[i])
+    return labels

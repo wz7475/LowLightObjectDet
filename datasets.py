@@ -6,7 +6,7 @@ import glob as glob
 
 from xml.etree import ElementTree as et
 from config import (
-    CLASSES, RESIZE_TO, TRAIN_DIR, BATCH_SIZE
+    CLASSES_EXDARK, RESIZE_TO, TRAIN_DIR, BATCH_SIZE
 )
 from torch.utils.data import Dataset, DataLoader
 from custom_utils import collate_fn, get_train_transform, get_valid_transform
@@ -157,12 +157,12 @@ class CustomDataset(Dataset):
 # Prepare the final datasets and data loaders.
 def create_train_dataset(DIR):
     train_dataset = CustomDataset(
-        DIR, RESIZE_TO, RESIZE_TO, CLASSES, get_train_transform()
+        DIR, RESIZE_TO, RESIZE_TO, CLASSES_EXDARK, get_train_transform()
     )
     return train_dataset
 def create_valid_dataset(DIR):
     valid_dataset = CustomDataset(
-        DIR, RESIZE_TO, RESIZE_TO, CLASSES, get_valid_transform()
+        DIR, RESIZE_TO, RESIZE_TO, CLASSES_EXDARK, get_valid_transform()
     )
     return valid_dataset
 def create_train_loader(train_dataset, num_workers=0):
@@ -191,12 +191,8 @@ def create_valid_loader(valid_dataset, num_workers=0):
 # Terminal to visualize sample images
 # USAGE: python datasets.py
 if __name__ == '__main__':
-    debug_save = "debug_save"
-    if not os.path.exists(debug_save):
-        os.makedirs(debug_save)
-    # sanity check of the Dataset pipeline with sample visualization
     dataset = CustomDataset(
-        TRAIN_DIR, RESIZE_TO, RESIZE_TO, CLASSES
+        TRAIN_DIR, RESIZE_TO, RESIZE_TO, CLASSES_EXDARK
     )
     print(f"Number of training images: {len(dataset)}")
     
@@ -204,7 +200,7 @@ if __name__ == '__main__':
     def visualize_sample(image, target, idx):
         for box_num in range(len(target['boxes'])):
             box = target['boxes'][box_num]
-            label = CLASSES[target['labels'][box_num]]
+            label = CLASSES_EXDARK[target['labels'][box_num]]
             try:
                 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             except:
@@ -225,8 +221,6 @@ if __name__ == '__main__':
                 (0, 0, 255), 
                 2
             )
-        # save the image
-        cv2.imwrite(f'{debug_save}/sample{idx}.jpg', image)
         cv2.imshow('Image', image)
         cv2.waitKey(0)
         # cv2.destroyAllWindows()

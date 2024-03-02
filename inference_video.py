@@ -8,7 +8,7 @@ import pathlib
 
 from model import create_model
 from config import (
-    NUM_CLASSES, DEVICE, CLASSES
+    NUM_CLASSES_EXDARK, DEVICE, CLASSES_EXDARK
 )
 
 np.random.seed(42)
@@ -38,7 +38,7 @@ os.makedirs('inference_outputs/videos', exist_ok=True)
 COLORS = [[0, 0, 0], [255, 0, 0]]
 
 # Load the best model and trained weights.
-model = create_model(num_classes=NUM_CLASSES, size=640)
+model = create_model(num_classes=NUM_CLASSES_EXDARK, size=640)
 checkpoint = torch.load('outputs/best_model.pth', map_location=DEVICE)
 model.load_state_dict(checkpoint['model_state_dict'])
 model.to(DEVICE).eval()
@@ -105,12 +105,12 @@ while(cap.isOpened()):
             boxes = boxes[scores >= args['threshold']].astype(np.int32)
             draw_boxes = boxes.copy()
             # Get all the predicited class names.
-            pred_classes = [CLASSES[i] for i in outputs[0]['labels'].cpu().numpy()]
+            pred_classes = [CLASSES_EXDARK[i] for i in outputs[0]['labels'].cpu().numpy()]
             
             # Draw the bounding boxes and write the class name on top of it.
             for j, box in enumerate(draw_boxes):
                 class_name = pred_classes[j]
-                color = COLORS[CLASSES.index(class_name)]
+                color = COLORS[CLASSES_EXDARK.index(class_name)]
                 # Recale boxes.
                 xmin = int((box[0] / image.shape[1]) * frame.shape[1])
                 ymin = int((box[1] / image.shape[0]) * frame.shape[0])

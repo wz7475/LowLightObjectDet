@@ -1,9 +1,9 @@
 from config import (
-    DEVICE, 
-    NUM_CLASSES, 
-    NUM_EPOCHS, 
+    DEVICE,
+    NUM_CLASSES_EXDARK,
+    NUM_EPOCHS,
     OUT_DIR,
-    VISUALIZE_TRANSFORMED_IMAGES, 
+    VISUALIZE_TRANSFORMED_IMAGES,
     NUM_WORKERS,
     RESIZE_TO,
     VALID_DIR,
@@ -114,7 +114,7 @@ if __name__ == '__main__':
     print(f"Number of validation samples: {len(valid_dataset)}\n")
 
     # Initialize the model and move to the computation device.
-    model = create_model(num_classes=NUM_CLASSES, size=RESIZE_TO)
+    model = create_model(num_classes=NUM_CLASSES_EXDARK, size=RESIZE_TO)
     model = model.to(DEVICE)
     print(model)
     # Total parameters and trainable parameters.
