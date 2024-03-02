@@ -4,6 +4,7 @@ from torchvision.models.detection.ssd import SSDClassificationHead
 from torchvision.models.detection import _utils
 from torchvision.models.detection import SSD300_VGG16_Weights
 
+
 def create_model(num_classes=91, size=300):
     # Load the Torchvision pretrained model.
     model = torchvision.models.detection.ssd300_vgg16(
@@ -23,6 +24,21 @@ def create_model(num_classes=91, size=300):
     model.transform.min_size = (size,)
     model.transform.max_size = size
     return model
+
+
+def create_fasterrcnn_model():
+    model = torchvision.models.detection.fasterrcnn_resnet50_fpn_v2(
+        weights=torchvision.models.detection.FasterRCNN_ResNet50_FPN_V2_Weights
+    )
+    return model
+
+
+def create_sdd300_vgg16_model():
+    model = torchvision.models.detection.ssd300_vgg16(
+        weights=SSD300_VGG16_Weights.COCO_V1
+    )
+    return model
+
 
 if __name__ == '__main__':
     model = create_model(2, 640)

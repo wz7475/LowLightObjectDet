@@ -1,9 +1,9 @@
 import torch
 
 from tqdm import tqdm
-from config import DEVICE, NUM_CLASSES, NUM_WORKERS
+from config import DEVICE, NUM_CLASSES_EXDARK, NUM_WORKERS
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
-from model import create_model
+from model import create_model, create_sdd300_vgg16_model
 from datasets import create_valid_dataset, create_valid_loader
 
 # Evaluation function
@@ -34,6 +34,8 @@ def validate(valid_data_loader, model):
             preds_dict['boxes'] = outputs[i]['boxes'].detach().cpu()
             preds_dict['scores'] = outputs[i]['scores'].detach().cpu()
             preds_dict['labels'] = outputs[i]['labels'].detach().cpu()
+            # TODO: translate COCO labels to ExDark labels
+            # $ outputs[0]["labels"].shape => torch.Size([200])
             preds.append(preds_dict)
             target.append(true_dict)
         #####################################
@@ -45,9 +47,10 @@ def validate(valid_data_loader, model):
 
 if __name__ == '__main__':
     # Load the best model and trained weights.
-    model = create_model(num_classes=NUM_CLASSES, size=640)
-    checkpoint = torch.load('outputs/best_model.pth', map_location=DEVICE)
-    model.load_state_dict(checkpoint['model_state_dict'])
+    # model = create_model(num_classes=NUM_CLASSES, size=640)
+    # checkpoint = torch.load('outputs/best_model.pth', map_location=DEVICE)
+    # model.load_state_dict(checkpoint['model_state_dict'])
+    model = create_sdd300_vgg16_model()
     model.to(DEVICE).eval()
 
     test_dataset = create_valid_dataset(
