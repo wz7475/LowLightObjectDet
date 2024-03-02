@@ -5,3 +5,6 @@ outputs
 .idea
 __pycache__
 .ipynb_checkpoints
+data2/dataset
+data2/ExDark*
+imageclasslist.txt*

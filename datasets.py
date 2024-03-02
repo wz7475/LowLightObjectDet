@@ -80,36 +80,6 @@ class CustomDataset(Dataset):
 
                 boxes.append([xmin_final, ymin_final, xmax_final, ymax_final])
 
-        # Box coordinates for xml files are extracted 
-        # and corrected for image size given.
-        # for member in root.findall('object'):
-        #     # Get label and map the `classes`.
-        #     labels.append(self.classes.index(member.find('name').text))
-        #
-        #     # Left corner x-coordinates.
-        #     xmin = int(member.find('bndbox').find('xmin').text)
-        #     # Right corner x-coordinates.
-        #     xmax = int(member.find('bndbox').find('xmax').text)
-        #     # Left corner y-coordinates.
-        #     ymin = int(member.find('bndbox').find('ymin').text)
-        #     # Right corner y-coordinates.
-        #     ymax = int(member.find('bndbox').find('ymax').text)
-        #
-        #     # Resize the bounding boxes according
-        #     # to resized image `width`, `height`.
-        #     xmin_final = (xmin/image_width)*self.width
-        #     xmax_final = (xmax/image_width)*self.width
-        #     ymin_final = (ymin/image_height)*self.height
-        #     ymax_final = (ymax/image_height)*self.height
-        #
-        #     # Check that all coordinates are within the image.
-        #     if xmax_final > self.width:
-        #         xmax_final = self.width
-        #     if ymax_final > self.height:
-        #         ymax_final = self.height
-        #
-        #     boxes.append([xmin_final, ymin_final, xmax_final, ymax_final])
-        
         # Bounding box to tensor.
         for i, box in enumerate(boxes):
             # Clipping the bounding box coordinates to ensure they are within [0, width] and [0, height] for x and y, respectively.

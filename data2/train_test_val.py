@@ -6,6 +6,7 @@ annotations_info_path = sys.argv[1]
 dest_dir = sys.argv[2]
 img_dir = sys.argv[3]
 annotation_dir = sys.argv[4]
+delimiter = sys.argv[5]
 
 
 with open(annotations_info_path, 'r') as f:
@@ -22,7 +23,7 @@ for dir in train_test_val_map.values():
 
 
 for annotation_info in annotations_info:
-    annotation_info = annotation_info.split(' ')
+    annotation_info = annotation_info.split(delimiter)
     annotation_path = annotation_info[0]
     train_test_val_idx = annotation_info[4]
     train_test_val = train_test_val_map[train_test_val_idx]
@@ -31,7 +32,6 @@ for annotation_info in annotations_info:
     img_src_path = os.path.join(img_dir, img_name)
     annotaion_name = img_name + ".txt"
     annotation_src_path = os.path.join(annotation_dir, annotaion_name)
-    # print(img_src_path, annotation_src_path)
 
     dest_img_path = os.path.join(dest_dir, train_test_val, os.path.basename(annotation_path))
     dest_annotaion_path = os.path.join(dest_dir, train_test_val, annotaion_name)
