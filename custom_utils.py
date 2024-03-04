@@ -5,7 +5,7 @@ import torch
 import matplotlib.pyplot as plt
 
 from albumentations.pytorch import ToTensorV2
-from config import DEVICE, CLASSES_EXDARK
+from config import DEVICE, CLASSES_COCO
 
 plt.style.use('ggplot')
 
@@ -112,7 +112,7 @@ def show_tranformed_image(train_loader):
                             (box[0], box[1]),
                             (box[2], box[3]),
                             (0, 0, 255), 2)
-                cv2.putText(sample, CLASSES_EXDARK[labels[box_num]],
+                cv2.putText(sample, CLASSES_COCO[labels[box_num]],
                             (box[0], box[1]-10), cv2.FONT_HERSHEY_SIMPLEX,
                             1.0, (0, 0, 255), 2)
             cv2.imshow('Transformed image', sample)
@@ -178,5 +178,5 @@ def convert_coco_to_exdark(labels: torch.Tensor):
     Converts the COCO labels to ExDark labels.
     """
     for i in range(len(labels)):
-        labels[i] = CLASSES_EXDARK.index(labels[i])
+        labels[i] = CLASSES_COCO.index(labels[i])
     return labels

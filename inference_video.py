@@ -8,7 +8,7 @@ import pathlib
 
 from model import create_model
 from config import (
-    NUM_CLASSES_EXDARK, DEVICE, CLASSES_EXDARK
+    NUM_CLASSES_EXDARK, DEVICE, CLASSES_COCO
 )
 
 np.random.seed(42)
@@ -105,12 +105,12 @@ while(cap.isOpened()):
             boxes = boxes[scores >= args['threshold']].astype(np.int32)
             draw_boxes = boxes.copy()
             # Get all the predicited class names.
-            pred_classes = [CLASSES_EXDARK[i] for i in outputs[0]['labels'].cpu().numpy()]
+            pred_classes = [CLASSES_COCO[i] for i in outputs[0]['labels'].cpu().numpy()]
             
             # Draw the bounding boxes and write the class name on top of it.
             for j, box in enumerate(draw_boxes):
                 class_name = pred_classes[j]
-                color = COLORS[CLASSES_EXDARK.index(class_name)]
+                color = COLORS[CLASSES_COCO.index(class_name)]
                 # Recale boxes.
                 xmin = int((box[0] / image.shape[1]) * frame.shape[1])
                 ymin = int((box[1] / image.shape[0]) * frame.shape[0])
