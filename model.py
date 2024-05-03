@@ -26,11 +26,17 @@ def create_model(num_classes=91, size=300):
     return model
 
 
-def create_fasterrcnn_model():
+def create_fasterrcnn_v2_model():
     model = torchvision.models.detection.fasterrcnn_resnet50_fpn_v2(
         weights=torchvision.models.detection.FasterRCNN_ResNet50_FPN_V2_Weights
     )
     return model
+def create_fasterrcnn_v1_model():
+    model = torchvision.models.detection.fasterrcnn_resnet50_fpn(
+        weights=torchvision.models.detection.FasterRCNN_ResNet50_FPN_Weights
+    )
+    return model
+
 
 
 def create_sdd300_vgg16_model():
