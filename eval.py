@@ -1,26 +1,42 @@
 import torch
-
-from tqdm import tqdm
-from config import DEVICE, NUM_CLASSES_EXDARK, NUM_WORKERS
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
-from model import create_model, create_sdd300_vgg16_model, create_fasterrcnn_v2_model, create_fasterrcnn_v1_model
+from tqdm import tqdm
+
+from config import DEVICE, NUM_WORKERS
 from datasets import create_valid_dataset, create_valid_loader
+from model import create_sdd300_vgg16_model
+
+
+def map_range_cooc_to_exdark(labels: torch.Tensor) -> torch.Tensor:
+    """ quick fix for coco range and gaps - maps labels to 0-12 range
+    below labels obtained in ./data/labels_mappers.py
+    13 stands for other labels which are detected by models trained on COCO, but not included in ExDark """
+    labels_map = {0: 0, 1: 11, 2: 1, 3: 5, 4: 10, 6: 4, 9: 2, 17: 6, 18: 9, 44: 3, 47: 8, 62: 7, 67: 12}
+    mapped_labels = []
+    for cur_label_tensor in labels:
+        cur_label = cur_label_tensor.item()
+        if cur_label in labels_map:
+            mapped_labels.append(labels_map[cur_label])
+        else:
+            mapped_labels.append(13)
+    return torch.tensor(mapped_labels)
+
 
 # Evaluation function
 def validate(valid_data_loader, model):
     print('Validating')
     model.eval()
-    
+
     # Initialize tqdm progress bar.
     prog_bar = tqdm(valid_data_loader, total=len(valid_data_loader))
     target = []
     preds = []
     for i, data in enumerate(prog_bar):
         images, targets = data
-        
+
         images = list(image.to(DEVICE) for image in images)
         targets = [{k: v.to(DEVICE) for k, v in t.items()} for t in targets]
-        
+
         with torch.no_grad():
             outputs = model(images, targets)
 
@@ -31,12 +47,13 @@ def validate(valid_data_loader, model):
             preds_dict = dict()
             true_dict['boxes'] = targets[i]['boxes'].detach().cpu()
             true_dict['labels'] = targets[i]['labels'].detach().cpu()
+            true_dict['labels'] = map_range_cooc_to_exdark(true_dict['labels'])
+
             preds_dict['boxes'] = outputs[i]['boxes'].detach().cpu()
             preds_dict['scores'] = outputs[i]['scores'].detach().cpu()
             preds_dict['labels'] = outputs[i]['labels'].detach().cpu()
-            print(targets[i]['labels'])
-            # TODO: translate COCO labels to ExDark labels
-            # $ outputs[0]["labels"].shape => torch.Size([200])
+            preds_dict['labels'] = map_range_cooc_to_exdark(preds_dict['labels'])
+
             preds.append(preds_dict)
             target.append(true_dict)
         #####################################
@@ -46,14 +63,11 @@ def validate(valid_data_loader, model):
     metric_summary = metric.compute()
     return metric_summary
 
+
 if __name__ == '__main__':
-    # Load the best model and trained weights.
-    # model = create_model(num_classes=NUM_CLASSES, size=640)
-    # checkpoint = torch.load('outputs/best_model.pth', map_location=DEVICE)
-    # model.load_state_dict(checkpoint['model_state_dict'])
-    # model = create_sdd300_vgg16_model()
+    model = create_sdd300_vgg16_model()
     # model = create_fasterrcnn_v2_model()
-    model = create_fasterrcnn_v1_model()
+    # model = create_fasterrcnn_v1_model()
     model = model.to(DEVICE).eval()
 
     test_dataset = create_valid_dataset(
@@ -62,5 +76,5 @@ if __name__ == '__main__':
     test_loader = create_valid_loader(test_dataset, num_workers=NUM_WORKERS)
 
     metric_summary = validate(test_loader, model)
-    print(f"mAP_50: {metric_summary['map_50']*100:.3f}")
-    print(f"mAP_50_95: {metric_summary['map']*100:.3f}")
+    print(f"mAP_50: {metric_summary['map_50'] * 100:.3f}")
+    print(f"mAP_50_95: {metric_summary['map'] * 100:.3f}")
