@@ -4,7 +4,7 @@ from tqdm import tqdm
 
 from config import DEVICE, NUM_WORKERS
 from datasets import create_valid_dataset, create_valid_loader
-from model import create_sdd300_vgg16_model
+from model import create_sdd300_vgg16_model, create_fasterrcnn_v1_model
 
 
 def map_range_cooc_to_exdark(labels: torch.Tensor) -> torch.Tensor:
@@ -31,6 +31,7 @@ def validate(valid_data_loader, model):
     prog_bar = tqdm(valid_data_loader, total=len(valid_data_loader))
     target = []
     preds = []
+    max_label = -1
     for i, data in enumerate(prog_bar):
         images, targets = data
 
@@ -53,10 +54,12 @@ def validate(valid_data_loader, model):
             preds_dict['scores'] = outputs[i]['scores'].detach().cpu()
             preds_dict['labels'] = outputs[i]['labels'].detach().cpu()
             preds_dict['labels'] = map_range_cooc_to_exdark(preds_dict['labels'])
+            max_label = max(preds_dict['labels']).item() if max(preds_dict['labels']).item() > max_label else max_label
 
             preds.append(preds_dict)
             target.append(true_dict)
         #####################################
+    print(max_label)
 
     metric = MeanAveragePrecision()
     metric.update(preds, target)
@@ -68,6 +71,7 @@ if __name__ == '__main__':
     model = create_sdd300_vgg16_model()
     # model = create_fasterrcnn_v2_model()
     # model = create_fasterrcnn_v1_model()
+
     model = model.to(DEVICE).eval()
 
     test_dataset = create_valid_dataset(
