@@ -134,6 +134,3 @@ for i in range(len(test_images)):
 
 print('TEST PREDICTIONS COMPLETE')
 cv2.destroyAllWindows()
-# Calculate and print the average FPS.
-avg_fps = total_fps / frame_count
-print(f"Average FPS: {avg_fps:.3f}")
