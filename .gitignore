@@ -8,3 +8,5 @@ __pycache__
 data2/dataset
 data2/ExDark*
 imageclasslist.txt*
+.pdm-python
+__MACOSX

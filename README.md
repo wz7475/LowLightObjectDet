@@ -10,7 +10,8 @@ This repository contains source code for diploma thesis titled: Object detection
   - make sure to have `wget` installed
   - install required packages via `pip install .` or `pdm install`
   - for more details check `pyproject.toml`
-
+- data
+  - run from root of repository `./prepare_data.sh`
 
 ## objective
 Framework for:
