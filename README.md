@@ -5,6 +5,13 @@ This repository contains source code for diploma thesis titled: Object detection
 
 ![sample img](readme_imgs/img1.png)
 
+## Setup
+- environment
+  - make sure to have `wget` installed
+  - install required packages via `pip install .` or `pdm install`
+  - for more details check `pyproject.toml`
+
+
 ## objective
 Framework for:
 - object detection with [ExDark dataset](https://github.com/cs-chan/Exclusively-Dark-Image-Dataset)
