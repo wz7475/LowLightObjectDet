@@ -28,7 +28,7 @@ Framework for:
 ```shell
 /data # directory with raw immutable data and script to convert labels and bounding boxes
 config.py # file with parameters like batch size
-datasets.py # torch dataset adjusted object detection task
+dataloading.py # torch dataset adjusted object detection task
 eval.py # metrics calculation like mAP
 train.py # training loop
 env.yml # conda environment configuration file

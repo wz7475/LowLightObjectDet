@@ -1,11 +1,10 @@
 import torch
-from torch.utils.data import DataLoader
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
 from tqdm import tqdm
 
-from exdark.config import DEVICE, NUM_WORKERS, TRAIN_DIR, RESIZE_TO, CLASSES_COCO
-from exdark.datasets import create_valid_dataset, create_valid_loader, CustomDataset
-from exdark.model import create_sdd300_vgg16_model, create_fasterrcnn_v1_model
+from exdark.config import DEVICE, NUM_WORKERS
+from exdark.datasets import create_valid_dataset, create_valid_loader
+from exdark.model import create_sdd300_vgg16_model
 
 
 def map_range_cooc_to_exdark(labels: torch.Tensor) -> torch.Tensor:

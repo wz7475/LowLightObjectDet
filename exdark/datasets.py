@@ -1,18 +1,18 @@
-import torch
+import glob as glob
+import os
+
 import cv2
 import numpy as np
-import os
-import glob as glob
-
-from xml.etree import ElementTree as et
-from exdark.config import (
-    CLASSES_COCO, RESIZE_TO, TRAIN_DIR, BATCH_SIZE, CLASSES_COCO
-)
+import torch
 from torch.utils.data import Dataset, DataLoader
+
+from exdark.config import (
+    RESIZE_TO, TRAIN_DIR, BATCH_SIZE, CLASSES_COCO
+)
 from exdark.custom_utils import collate_fn, get_train_transform, get_valid_transform
 
-# The dataset class.
-class CustomDataset(Dataset):
+
+class ExDarkDataset(Dataset):
     def __init__(self, dir_path, width, height, classes, transforms=None):
         self.transforms = transforms
         self.dir_path = dir_path
@@ -21,7 +21,7 @@ class CustomDataset(Dataset):
         self.classes = classes
         self.image_file_types = ['*.jpg', '*.jpeg', '*.png', '*.ppm', '*.JPG']
         self.all_image_paths = []
-        
+
         # Get all the image paths in sorted order.
         for file_type in self.image_file_types:
             self.all_image_paths.extend(glob.glob(os.path.join(self.dir_path, file_type)))
@@ -39,11 +39,11 @@ class CustomDataset(Dataset):
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB).astype(np.float32)
         image_resized = cv2.resize(image, (self.width, self.height))
         image_resized /= 255.0
-        
-        # Capture the corresponding XML file for getting the annotations.
+
+        # Capture the corresponding file for getting the annotations.
         annot_filename = image_name.lower() + ".txt"
         annot_file_path = os.path.join(self.dir_path, annot_filename)
-        
+
         boxes = []
         labels = []
 
@@ -51,6 +51,7 @@ class CustomDataset(Dataset):
         image_width = image.shape[1]
         image_height = image.shape[0]
 
+        # read bboxes coordinates in coco style and convert them to pascal voc style
         with open(annot_file_path, 'r') as file:
             lines = file.readlines()
             lines = [line.strip() for line in lines]
@@ -77,46 +78,33 @@ class CustomDataset(Dataset):
                     xmax_final = self.width
                 if ymax_final > self.height:
                     ymax_final = self.height
+                if xmin_final < 0:
+                    xmax_final = 0
+                if ymin_final < 0:
+                    ymax_final = 0
 
                 boxes.append([xmin_final, ymin_final, xmax_final, ymax_final])
-
-        # Bounding box to tensor.
-        for i, box in enumerate(boxes):
-            # Clipping the bounding box coordinates to ensure they are within [0, width] and [0, height] for x and y, respectively.
-            xmin_clipped = np.clip(box[0], 0, self.width)
-            ymin_clipped = np.clip(box[1], 0, self.height)
-            xmax_clipped = np.clip(box[2], 0, self.width)
-            ymax_clipped = np.clip(box[3], 0, self.height)
-
-            # Update the box with clipped values
-            boxes[i] = [xmin_clipped, ymin_clipped, xmax_clipped, ymax_clipped]
         boxes = torch.as_tensor(boxes, dtype=torch.float32)
-
-        # Area of the bounding boxes.
         area = (boxes[:, 3] - boxes[:, 1]) * (boxes[:, 2] - boxes[:, 0]) if len(boxes) > 0 \
             else torch.as_tensor(boxes, dtype=torch.float32)
-        # No crowd instances.
         iscrowd = torch.zeros((boxes.shape[0],), dtype=torch.int64)
-        # Labels to tensor.
         labels = torch.as_tensor(labels, dtype=torch.int64)
-
-        # Prepare the final `target` dictionary.
         target = {}
         target["boxes"] = boxes
         target["labels"] = labels
-        target["area"] = area
-        target["iscrowd"] = iscrowd
+        target["area"] = area  # area can be used to for evaluation to group small, medium and large objects
+        target["iscrowd"] = iscrowd  # iscrowd set to True indicates crowd i.e. to ignore this objects
         image_id = torch.tensor([idx])
         target["image_id"] = image_id
 
         # Apply the image transforms.
         if self.transforms:
-            sample = self.transforms(image = image_resized,
-                                     bboxes = target['boxes'],
-                                     labels = labels)
+            sample = self.transforms(image=image_resized,
+                                     bboxes=target['boxes'],
+                                     labels=labels)
             image_resized = sample['image']
             target['boxes'] = torch.Tensor(sample['bboxes'])
-        
+
         if np.isnan((target['boxes']).numpy()).any() or target['boxes'].shape == torch.Size([0]):
             target['boxes'] = torch.zeros((0, 4), dtype=torch.int64)
         return image_resized, target
@@ -124,17 +112,21 @@ class CustomDataset(Dataset):
     def __len__(self):
         return len(self.all_images)
 
-# Prepare the final datasets and data loaders.
+
 def create_train_dataset(DIR):
-    train_dataset = CustomDataset(
+    train_dataset = ExDarkDataset(
         DIR, RESIZE_TO, RESIZE_TO, CLASSES_COCO, get_train_transform()
     )
     return train_dataset
+
+
 def create_valid_dataset(DIR):
-    valid_dataset = CustomDataset(
+    valid_dataset = ExDarkDataset(
         DIR, RESIZE_TO, RESIZE_TO, CLASSES_COCO, get_valid_transform()
     )
     return valid_dataset
+
+
 def create_train_loader(train_dataset, num_workers=0):
     train_loader = DataLoader(
         train_dataset,
@@ -145,6 +137,8 @@ def create_train_loader(train_dataset, num_workers=0):
         drop_last=True
     )
     return train_loader
+
+
 def create_valid_loader(valid_dataset, num_workers=0):
     valid_loader = DataLoader(
         valid_dataset,
@@ -157,45 +151,43 @@ def create_valid_loader(valid_dataset, num_workers=0):
     return valid_loader
 
 
-# execute `datasets.py`` using Python command from 
-# Terminal to visualize sample images
-# USAGE: python datasets.py
 if __name__ == '__main__':
-    dataset = CustomDataset(
+    dataset = ExDarkDataset(
         TRAIN_DIR, RESIZE_TO, RESIZE_TO, CLASSES_COCO
     )
     print(f"Number of training images: {len(dataset)}")
-    
-    # function to visualize a single sample
+
     def visualize_sample(image, target, idx):
         for box_num in range(len(target['boxes'])):
             box = target['boxes'][box_num]
             label = CLASSES_COCO[target['labels'][box_num]]
-            try:
-                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            except:
-                image = cv2.cvtColor(image.detach().cpu().numpy(), cv2.COLOR_RGB2BGR)
+
 
             cv2.rectangle(
-                image, 
+                image,
                 (int(box[0]), int(box[1])), (int(box[2]), int(box[3])),
-                (0, 0, 255), 
+                (0, 0, 255),
                 2
             )
             cv2.putText(
-                image, 
-                label, 
-                (int(box[0]), int(box[1]-5)), 
-                cv2.FONT_HERSHEY_SIMPLEX, 
-                0.7, 
-                (0, 0, 255), 
+                image,
+                label,
+                (int(box[0]), int(box[1] - 5)),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.7,
+                (0, 0, 255),
                 2
             )
         cv2.imshow('Image', image)
         cv2.waitKey(0)
-        # cv2.destroyAllWindows()
+
+
     NUM_SAMPLES_TO_VISUALIZE = len(dataset)
     for i in range(NUM_SAMPLES_TO_VISUALIZE):
         image, target = dataset[i]
-        print(f"Sample {i+1}: {image.shape}")
+        try:
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        except:
+            image = cv2.cvtColor(image.detach().cpu().numpy(), cv2.COLOR_RGB2BGR)
+        print(f"Sample {i + 1}: {image.shape}")
         visualize_sample(image, target, i)
