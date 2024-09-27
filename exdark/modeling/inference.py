@@ -6,9 +6,9 @@ import os
 import time
 import argparse
 
-from model import create_sdd300_vgg16_model
+from exdark.model import create_sdd300_vgg16_model
 
-from config import (
+from exdark.config import (
     DEVICE, CLASSES_COCO, NUM_CLASSES_EXDARK
 )
 

@@ -1,4 +1,4 @@
-from config import (
+from exdark.config import (
     DEVICE,
     NUM_CLASSES_EXDARK,
     NUM_EPOCHS,
@@ -9,8 +9,8 @@ from config import (
     VALID_DIR,
     TRAIN_DIR
 )
-from model import create_model
-from custom_utils import (
+from exdark.model import create_model
+from exdark.custom_utils import (
     Averager, 
     SaveBestModel, 
     save_model, 
@@ -18,7 +18,7 @@ from custom_utils import (
     save_mAP
 )
 from tqdm.auto import tqdm
-from datasets import (
+from exdark.datasets import (
     create_train_dataset, 
     create_valid_dataset, 
     create_train_loader, 

@@ -3,7 +3,7 @@
 This repository contains source code for diploma thesis titled: Object detection in challenging lighting conditions
 
 
-![sample img](readme_imgs/img1.png)
+![sample img](doc/readme_imgs/img1.png)
 
 ## Setup
 - environment

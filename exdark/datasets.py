@@ -5,11 +5,11 @@ import os
 import glob as glob
 
 from xml.etree import ElementTree as et
-from config import (
+from exdark.config import (
     CLASSES_COCO, RESIZE_TO, TRAIN_DIR, BATCH_SIZE, CLASSES_COCO
 )
 from torch.utils.data import Dataset, DataLoader
-from custom_utils import collate_fn, get_train_transform, get_valid_transform
+from exdark.custom_utils import collate_fn, get_train_transform, get_valid_transform
 
 # The dataset class.
 class CustomDataset(Dataset):

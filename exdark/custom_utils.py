@@ -5,7 +5,7 @@ import torch
 import matplotlib.pyplot as plt
 
 from albumentations.pytorch import ToTensorV2
-from config import DEVICE, CLASSES_COCO
+from exdark.config import DEVICE, CLASSES_COCO
 
 plt.style.use('ggplot')
 
