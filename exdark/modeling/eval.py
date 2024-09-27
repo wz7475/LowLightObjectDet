@@ -1,9 +1,10 @@
 import torch
+from torch.utils.data import DataLoader
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
 from tqdm import tqdm
 
-from config import DEVICE, NUM_WORKERS
-from datasets import create_valid_dataset, create_valid_loader
+from config import DEVICE, NUM_WORKERS, TRAIN_DIR, RESIZE_TO, CLASSES_COCO
+from datasets import create_valid_dataset, create_valid_loader, CustomDataset
 from model import create_sdd300_vgg16_model, create_fasterrcnn_v1_model
 
 
@@ -78,6 +79,8 @@ if __name__ == '__main__':
         'data/dataset/split/test',
     )
     test_loader = create_valid_loader(test_dataset, num_workers=NUM_WORKERS)
+    # test_dataset = CustomDataset(TRAIN_DIR, RESIZE_TO, RESIZE_TO, CLASSES_COCO)
+    # test_loader = DataLoader(test_dataset, collate_fn=lambda batch: tuple(zip(*batch)))
 
     metric_summary = validate(test_loader, model)
     print(f"mAP_50: {metric_summary['map_50'] * 100:.3f}")
