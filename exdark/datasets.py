@@ -10,6 +10,7 @@ from exdark.config import (
     RESIZE_TO, TRAIN_DIR, BATCH_SIZE, CLASSES_COCO
 )
 from exdark.custom_utils import collate_fn, get_train_transform, get_valid_transform
+from exdark.visulisation.bbox import draw_bbox
 
 
 class ExDarkDataset(Dataset):
@@ -35,7 +36,7 @@ class ExDarkDataset(Dataset):
         image_path = os.path.join(self.dir_path, image_name)
 
         # Read and preprocess the image.
-        image = cv2.imread(image_path)
+        image = cv2.imread(image_path).astype(np.float32)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB).astype(np.float32)
         image_resized = cv2.resize(image, (self.width, self.height))
         image_resized /= 255.0
@@ -155,39 +156,6 @@ if __name__ == '__main__':
     dataset = ExDarkDataset(
         TRAIN_DIR, RESIZE_TO, RESIZE_TO, CLASSES_COCO
     )
-    print(f"Number of training images: {len(dataset)}")
 
-    def visualize_sample(image, target, idx):
-        for box_num in range(len(target['boxes'])):
-            box = target['boxes'][box_num]
-            label = CLASSES_COCO[target['labels'][box_num]]
-
-
-            cv2.rectangle(
-                image,
-                (int(box[0]), int(box[1])), (int(box[2]), int(box[3])),
-                (0, 0, 255),
-                2
-            )
-            cv2.putText(
-                image,
-                label,
-                (int(box[0]), int(box[1] - 5)),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.7,
-                (0, 0, 255),
-                2
-            )
-        cv2.imshow('Image', image)
-        cv2.waitKey(0)
-
-
-    NUM_SAMPLES_TO_VISUALIZE = len(dataset)
-    for i in range(NUM_SAMPLES_TO_VISUALIZE):
-        image, target = dataset[i]
-        try:
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        except:
-            image = cv2.cvtColor(image.detach().cpu().numpy(), cv2.COLOR_RGB2BGR)
-        print(f"Sample {i + 1}: {image.shape}")
-        visualize_sample(image, target, i)
+    for image, target in dataset:
+        draw_bbox(image, target)
