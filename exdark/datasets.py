@@ -10,7 +10,7 @@ from exdark.config import (
     RESIZE_TO, TRAIN_DIR, BATCH_SIZE, CLASSES_COCO
 )
 from exdark.custom_utils import collate_fn, get_train_transform, get_valid_transform
-from exdark.visulisation.bbox import draw_bbox
+from exdark.visulisation.bbox import draw_bbox_from_targets
 
 
 class ExDarkDataset(Dataset):
@@ -158,4 +158,4 @@ if __name__ == '__main__':
     )
 
     for image, target in dataset:
-        draw_bbox(image, target)
+        draw_bbox_from_targets(image, target)

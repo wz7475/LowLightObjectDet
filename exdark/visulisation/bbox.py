@@ -1,7 +1,20 @@
 import cv2
 import numpy as np
 
-from exdark.config import CLASSES_COCO
+from exdark.config import CLASSES_COCO, NUM_CLASSES_EXDARK
+
+COLORS = [[0, 0, 0], [255, 0, 0]]
+COLORS.append([255, 255, 0])  # Yellow
+COLORS.append([0, 255, 0])  # Green
+COLORS.append([0, 255, 255])  # Cyan
+COLORS.append([255, 0, 255])  # Magenta
+COLORS.append([128, 0, 0])  # Maroon
+COLORS.append([128, 128, 0])  # Olive
+COLORS.append([0, 128, 0])  # Dark Green
+COLORS.append([128, 0, 128])  # Purple
+COLORS.append([0, 128, 128])  # Teal
+COLORS.append([192, 192, 192])  # Silver
+COLORS.append([128, 128, 128])  # Gray
 
 
 def draw_text(img, text,
@@ -12,7 +25,6 @@ def draw_text(img, text,
               text_color=(0, 0, 255),
               text_color_bg=(0, 0, 0)
               ):
-
     x, y = pos
     text_size, _ = cv2.getTextSize(text, font, font_scale, font_thickness)
     text_w, text_h = text_size
@@ -22,7 +34,40 @@ def draw_text(img, text,
     return text_size
 
 
-def draw_bbox(image_rgb: np.array, target: dict, score: float = None):
+def draw_bbox_from_preds(image_rgb: np.array, outputs: dict, threshold: float = 0.5):
+    outputs = [{k: v.to('cpu') for k, v in t.items()} for t in outputs]
+    if len(outputs[0]['boxes']) != 0:
+        boxes = outputs[0]['boxes'].data.numpy()
+        scores = outputs[0]['scores'].data.numpy()
+        boxes = boxes[scores >= threshold].astype(np.int32)
+        draw_boxes = boxes.copy()
+        pred_classes = [CLASSES_COCO[i] for i in outputs[0]['labels'].cpu().numpy()]
+        for j, box in enumerate(draw_boxes):
+            class_name = pred_classes[j]
+            color = COLORS[CLASSES_COCO.index(class_name) % NUM_CLASSES_EXDARK]
+            xmin = box[0]
+            ymin = box[1]
+            xmax = box[2]
+            ymax = box[3]
+            cv2.rectangle(image_rgb,
+                          (xmin, ymin),
+                          (xmax, ymax),
+                          color,
+                          3)
+            cv2.putText(image_rgb,
+                        class_name,
+                        (xmin, ymin - 5),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.8,
+                        color,
+                        2,
+                        lineType=cv2.LINE_AA)
+    image_bgr = cv2.cvtColor(image_rgb, cv2.COLOR_RGB2BGR)
+    cv2.imshow('Prediction', image_bgr)
+    cv2.waitKey(0)
+
+
+def draw_bbox_from_targets(image_rgb: np.array, target: dict):
     try:
         image_bgr = cv2.cvtColor(image_rgb, cv2.COLOR_RGB2BGR)
     except:
@@ -31,9 +76,6 @@ def draw_bbox(image_rgb: np.array, target: dict, score: float = None):
     for box_num in range(len(target['boxes'])):
         box = target['boxes'][box_num]
         label = CLASSES_COCO[target['labels'][box_num]]
-        text_for_bbox = label
-        if score:
-            text_for_bbox = f"{label} - {int(score * 100)}%"
 
         cv2.rectangle(
             image_bgr,
@@ -42,6 +84,6 @@ def draw_bbox(image_rgb: np.array, target: dict, score: float = None):
             1
         )
 
-        draw_text(image_bgr, text_for_bbox, pos=(int(box[0]), int(box[1] - 5)))
+        draw_text(image_bgr, label, pos=(int(box[0]), int(box[1] - 5)))
     cv2.imshow('Image', image_bgr)
     cv2.waitKey(0)
