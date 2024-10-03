@@ -7,19 +7,18 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 
 from exdark.config import (
-    RESIZE_TO, TRAIN_DIR, BATCH_SIZE, CLASSES_COCO
+    RESIZE_TO, TEST_DIR, BATCH_SIZE
 )
 from exdark.custom_utils import collate_fn, get_train_transform, get_valid_transform
 from exdark.visulisation.bbox import draw_bbox_from_targets
 
 
 class ExDarkDataset(Dataset):
-    def __init__(self, dir_path, width, height, classes, transforms=None):
+    def __init__(self, dir_path, width, height, transforms=None):
         self.transforms = transforms
         self.dir_path = dir_path
         self.height = height
         self.width = width
-        self.classes = classes
         self.image_file_types = ['*.jpg', '*.jpeg', '*.png', '*.ppm', '*.JPG']
         self.all_image_paths = []
 
@@ -58,7 +57,7 @@ class ExDarkDataset(Dataset):
             lines = [line.strip() for line in lines]
             for line in lines:
                 object_info = line.split(",")
-                labels.append(self.classes.index(object_info[0]))
+                labels.append(int(object_info[0]))
 
                 l = float(object_info[1])
                 t = float(object_info[2])
@@ -116,14 +115,14 @@ class ExDarkDataset(Dataset):
 
 def create_train_dataset(DIR):
     train_dataset = ExDarkDataset(
-        DIR, RESIZE_TO, RESIZE_TO, CLASSES_COCO, get_train_transform()
+        DIR, RESIZE_TO, RESIZE_TO, get_train_transform()
     )
     return train_dataset
 
 
 def create_valid_dataset(DIR):
     valid_dataset = ExDarkDataset(
-        DIR, RESIZE_TO, RESIZE_TO, CLASSES_COCO, get_valid_transform()
+        DIR, RESIZE_TO, RESIZE_TO, get_valid_transform()
     )
     return valid_dataset
 
@@ -153,9 +152,7 @@ def create_valid_loader(valid_dataset, num_workers=0):
 
 
 if __name__ == '__main__':
-    dataset = ExDarkDataset(
-        TRAIN_DIR, RESIZE_TO, RESIZE_TO, CLASSES_COCO
-    )
+    dataset = ExDarkDataset(TEST_DIR, RESIZE_TO, RESIZE_TO)
 
     for image, target in dataset:
         draw_bbox_from_targets(image, target)

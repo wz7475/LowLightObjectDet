@@ -9,10 +9,9 @@ NUM_WORKERS = 1  # Number of parallel workers for data loading.
 
 DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
-# Training images and XML files directory.
 TRAIN_DIR = 'data/dataset/split/train'
-# Validation images and XML files directory.
 VALID_DIR = 'data/dataset/split/val'
+TEST_DIR = 'data/dataset/split/test'
 
 
 CLASSES_COCO = torchvision.models.detection.SSD300_VGG16_Weights.COCO_V1.meta["categories"]

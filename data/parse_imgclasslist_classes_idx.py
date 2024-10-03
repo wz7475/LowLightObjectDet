@@ -2,7 +2,7 @@ import os
 
 import pandas as pd
 from labels_mappers import generate_exdark2coco_mapping
-from labels_storage import coco_labels, exdark_labels
+from labels_storage import coco_labels, exdark_custon_labels
 
 
 def parse_image_class_list_txt(input_file_path: str, output_path: str, labels_map: dict):
@@ -24,5 +24,5 @@ if __name__ == "__main__":
     class_list_path_in = sys.argv[1]
     class_list_path_out = sys.argv[2]
 
-    labels_idx_map, _ = generate_exdark2coco_mapping(coco_labels, exdark_labels)
+    labels_idx_map, _ = generate_exdark2coco_mapping(coco_labels, exdark_custon_labels)
     parse_image_class_list_txt(class_list_path_in, class_list_path_out, labels_idx_map)

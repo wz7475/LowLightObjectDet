@@ -1,6 +1,6 @@
 from typing import List, Tuple
 from labels_storage import coco2exdark_exceptions, exdark2coco_exceptions
-from labels_storage import coco_labels, exdark_labels
+from labels_storage import coco_labels, exdark_custon_labels
 
 def generate_coco2exdark_mapping(coco_categories: List[str], exdark_categories: List[str]):
     mapping_idx = {}
@@ -33,6 +33,6 @@ def generate_exdark2coco_mapping(coco_categories: List[str], exdark_categories: 
 
 
 if __name__ == "__main__":
-    labels_idx_map, _ = generate_coco2exdark_mapping(coco_labels, exdark_labels)
+    labels_idx_map, _ = generate_coco2exdark_mapping(coco_labels, exdark_custon_labels)
     # labels_idx_map, _ = generate_exdark2coco_mapping(coco_labels, exdark_labels)
     print(labels_idx_map)

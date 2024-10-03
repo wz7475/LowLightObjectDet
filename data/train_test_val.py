@@ -19,7 +19,7 @@ train_test_val_map = {
     "3": "val"
 }
 for dir in train_test_val_map.values():
-    os.makedirs(os.path.join(dest_dir, dir))
+    os.makedirs(os.path.join(dest_dir, dir), exist_ok=True)
 
 
 for annotation_info in annotations_info:

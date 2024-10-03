@@ -2,8 +2,9 @@ import cv2
 import numpy as np
 
 from exdark.config import CLASSES_COCO, NUM_CLASSES_EXDARK
+from data.labels_storage import exdark_idx2label
 
-COLORS = [[0, 0, 255], [255, 0, 0]]
+COLORS = [[0, 0, 0], [0, 0, 255]]
 COLORS.append([255, 255, 0])
 COLORS.append([0, 255, 0])
 COLORS.append([0, 255, 255])
@@ -73,9 +74,10 @@ def draw_bbox_from_targets(image_rgb: np.array, target: dict):
 
     for box_num in range(len(target['boxes'])):
         box = target['boxes'][box_num]
-        label = CLASSES_COCO[target['labels'][box_num]]
+        label_num = target['labels'][box_num].item()
+        label_name = exdark_idx2label[label_num]
 
-        color = COLORS[CLASSES_COCO.index(label) % NUM_CLASSES_EXDARK]
-        draw_bbox_with_text(image_bgr, box, label, color)
+        color = COLORS[label_num]
+        draw_bbox_with_text(image_bgr, box, label_name, color)
     cv2.imshow('Image', image_bgr)
     cv2.waitKey(0)
