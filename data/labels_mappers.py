@@ -1,21 +1,6 @@
 from typing import List, Tuple
-from labels_storage import coco2exdark_exceptions, exdark2coco_exceptions
-from labels_storage import coco_labels, exdark_custon_labels
 
-def generate_coco2exdark_mapping(coco_categories: List[str], exdark_categories: List[str]):
-    mapping_idx = {}
-    mapping_cat = {}
-    for idx_coco, category_coco in enumerate(coco_categories):
-        if category_coco in coco2exdark_exceptions:
-            category_coco = coco2exdark_exceptions[category_coco]
-        try:
-            idx_exdark = exdark_categories.index(category_coco)
-        except ValueError:
-            # idx_exdark = exdark_categories.index("other")
-            continue
-        mapping_idx[idx_coco] = idx_exdark
-        mapping_cat[category_coco] = exdark_categories[idx_exdark]
-    return mapping_idx, mapping_cat
+from labels_storage import exdark2coco_exceptions
 
 
 def generate_exdark2coco_mapping(coco_categories: List[str], exdark_categories: List[str]) -> Tuple[dict, dict]:
@@ -30,9 +15,3 @@ def generate_exdark2coco_mapping(coco_categories: List[str], exdark_categories: 
         mapping_idx[idx_exdark] = idx_coco
         mapping_cat[category_exdark] = coco_categories[idx_coco]
     return mapping_idx, mapping_cat
-
-
-if __name__ == "__main__":
-    labels_idx_map, _ = generate_coco2exdark_mapping(coco_labels, exdark_custon_labels)
-    # labels_idx_map, _ = generate_exdark2coco_mapping(coco_labels, exdark_labels)
-    print(labels_idx_map)

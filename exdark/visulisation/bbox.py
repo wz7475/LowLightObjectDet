@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 from exdark.config import CLASSES_COCO, NUM_CLASSES_EXDARK
-from data.labels_storage import exdark_idx2label
+from data.labels_storage import exdark_idx2label, exdark_coco_like_labels
 
 COLORS = [[0, 0, 0], [0, 0, 255]]
 COLORS.append([255, 255, 0])
@@ -55,10 +55,10 @@ def draw_bbox_from_preds(image_rgb: np.array, outputs: dict, threshold: float = 
     if len(outputs[0]['boxes']) != 0:
         boxes = outputs[0]['boxes'].data.numpy()
         scores = outputs[0]['scores'].data.numpy()
-        boxes = boxes[scores >= threshold].astype(np.int32)
-        pred_classes = [CLASSES_COCO[i] for i in outputs[0]['labels'].cpu().numpy()]
+        boxes = boxes[scores >= threshold].astype(np.int32) # scores are sorted from highest to lowest
+        pred_classes = outputs[0]['labels'].cpu().numpy()
         for j, (box, score) in enumerate(zip(boxes, scores)):
-            class_name = pred_classes[j]
+            class_name = exdark_coco_like_labels[pred_classes[j]]
             text_to_write = f"{class_name} {int(score * 100)}%"
             color = COLORS[CLASSES_COCO.index(class_name) % NUM_CLASSES_EXDARK]
             draw_bbox_with_text(image_bgr, box, text_to_write, color)

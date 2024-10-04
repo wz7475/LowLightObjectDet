@@ -9,6 +9,7 @@ from exdark.config import (
     DEVICE
 )
 from exdark.model import create_sdd300_vgg16_model
+from exdark.models.cocowraper import ExDarkAsCOCOWrapper
 from exdark.visulisation.bbox import draw_bbox_from_preds
 
 
@@ -36,7 +37,8 @@ if __name__ == "__main__":
         help='path to input image directory',
     )
     args = vars(parser.parse_args())
-    model = create_sdd300_vgg16_model()
+    core_model = create_sdd300_vgg16_model()
+    model = ExDarkAsCOCOWrapper(core_model)
     model.eval()
     model = model.to(DEVICE)
     test_images = glob.glob(f"{args['input']}/*.jpg")
