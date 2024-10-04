@@ -40,13 +40,15 @@ class ExDarkAsCOCOWrapper(nn.Module):
 
 if __name__ == "__main__":
     img_name = "temp.jpg"
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(device)
     urllib.request.urlretrieve("http://farm6.staticflickr.com/5341/9632894369_e180ee5731_z.jpg", img_name)
-    img = torchvision.io.read_image(img_name).float()
+    img = torchvision.io.read_image(img_name).float().to(device)
     core_model = torchvision.models.detection.fasterrcnn_resnet50_fpn(
         weights=torchvision.models.detection.FasterRCNN_ResNet50_FPN_Weights
     )
     wrapped_model = ExDarkAsCOCOWrapper(core_model)
-    wrapped_model.to(torch.device("cpu"))
+    wrapped_model.to(device)
     wrapped_model.eval()
     result = wrapped_model([img, img])
 
