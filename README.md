@@ -7,7 +7,7 @@ This repository contains source code for diploma thesis titled: Object detection
 
 ## Setup
 - environment
-  - make sure to have `wget` installed
+  - make sure to have `wget` and `unzip` installed
   - install required packages via `pip install .` or `pdm install`
   - for more details check `pyproject.toml`
 - data
