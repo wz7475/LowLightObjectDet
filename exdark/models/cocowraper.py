@@ -1,9 +1,10 @@
 import os
 import urllib.request
+from typing import Optional
 
 import torch
 import torchvision
-from torch import nn
+from torch import nn, Tensor
 
 from data.labels_storage import coco2coco_like_exdark
 
@@ -33,8 +34,10 @@ class ExDarkAsCOCOWrapper(nn.Module):
             filtered_detections_list.append(dict((k, torch.tensor(v)) for k, v in filtered_detections_dict.items()))
         return filtered_detections_list
 
-    def forward(self, images):
-        outputs = self.model(images)
+    def forward(
+            self, images: list[Tensor], targets: Optional[list[dict[str, Tensor]]] = None
+    ):
+        outputs = self.model(images, targets)
         return self._filter_detections(outputs)
 
 
