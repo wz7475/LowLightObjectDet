@@ -79,7 +79,7 @@ class ExDarkDataset(Dataset):
                 if ymax_final > self.height:
                     ymax_final = self.height
                 if xmin_final < 0:
-                    xmax_final = 0
+                    xmin_final = 0
                 if ymin_final < 0:
                     ymax_final = 0
 

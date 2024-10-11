@@ -5,7 +5,7 @@
 groups = ["default"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.2"
-content_hash = "sha256:a2de92a4472b2813bcfc5216073f9b343ee38aa6846d004b8e62d4174834bbf0"
+content_hash = "sha256:9666e82478a2f90c4d04a6b6e5542a6c08401e92caaf3b49577bbe9acd6ff700"
 
 [[package]]
 name = "albumentations"
@@ -814,6 +814,41 @@ files = [
 ]
 
 [[package]]
+name = "pycocotools"
+version = "2.0.8"
+requires_python = ">=3.9"
+summary = "Official APIs for the MS-COCO dataset"
+groups = ["default"]
+dependencies = [
+    "matplotlib>=2.1.0",
+    "numpy",
+]
+files = [
+    {file = "pycocotools-2.0.8-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:9a66886f45b04cee1ff0492e9f5e25d430d8aa3eb63e63c4ebc620945caa11b9"},
+    {file = "pycocotools-2.0.8-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:257130b65b7b0f122ce1ed62942867ca9789e56a68109682796cc85c9770c74a"},
+    {file = "pycocotools-2.0.8-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:663c14cd471913aabecb17ddb52b3b254a65dcaba26ccfea408c52c75cc3862c"},
+    {file = "pycocotools-2.0.8-cp310-cp310-musllinux_1_1_aarch64.whl", hash = "sha256:35a6ef931448632efe1c83eb2ac3c37c53b3c080a5432bc6ff1858944a603a2d"},
+    {file = "pycocotools-2.0.8-cp310-cp310-musllinux_1_1_x86_64.whl", hash = "sha256:e7b4ee8b15539d6f789857faefe7d3eef81755f7b17f60903798524e4f321a5c"},
+    {file = "pycocotools-2.0.8-cp310-cp310-win_amd64.whl", hash = "sha256:889edd2dbf61f4d2fe77c2e8e5608476903d1911d2ed00f9911354eff23f2423"},
+    {file = "pycocotools-2.0.8-cp310-cp310-win_arm64.whl", hash = "sha256:52e06a833fad735485cad5c1f8fe40e2b586261b2856806b5d6923b0b5a3c971"},
+    {file = "pycocotools-2.0.8-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:92bf788e6936fc52b57ccaaa78ecdaeac81872eebbfc45b6fe16ae18b85709bd"},
+    {file = "pycocotools-2.0.8-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:6a07f57f991e379959c0f4a1b9ea35d875876433b7f45c6d8fe6b718e58834bc"},
+    {file = "pycocotools-2.0.8-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:5968a1e5421719af9eb7ccee4c540bfb18b1fc95d30d9a48571d0aaeb159a1ae"},
+    {file = "pycocotools-2.0.8-cp311-cp311-musllinux_1_1_aarch64.whl", hash = "sha256:59eb7b1839f269262456347b6fe2bb88a8be56b32d87fab946483746e1f18a07"},
+    {file = "pycocotools-2.0.8-cp311-cp311-musllinux_1_1_x86_64.whl", hash = "sha256:05480f731fcd7c5d05389081f84198f3b8117f4560227185bc462cccb5c79181"},
+    {file = "pycocotools-2.0.8-cp311-cp311-win_amd64.whl", hash = "sha256:e680e27e58b840c105fa09a3bb1d91706038c5c8d7b7bf09c2e5ecbd1b05ad7f"},
+    {file = "pycocotools-2.0.8-cp311-cp311-win_arm64.whl", hash = "sha256:16c5a1d2c8726149b5a0e6fe95095ffc172d4012ece5dee9b5beeef708fc0284"},
+    {file = "pycocotools-2.0.8-cp312-cp312-macosx_10_9_universal2.whl", hash = "sha256:dd4616621d062882db677de5c64b1b0f6efbcaed9fd284b61e7ba4b16ab24d7a"},
+    {file = "pycocotools-2.0.8-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:5683ba2612c39094a2e8453d40349768a3da6673376786651481d6f553ff7b50"},
+    {file = "pycocotools-2.0.8-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:b89f399eb851d18f68dfa7f126380394ec0820915c7b3831dd37563bc58daa95"},
+    {file = "pycocotools-2.0.8-cp312-cp312-musllinux_1_1_aarch64.whl", hash = "sha256:e6d528c4f35580347ee3cd57f92cf0926e9b6a688d0904b2ea8a814ae2e57a47"},
+    {file = "pycocotools-2.0.8-cp312-cp312-musllinux_1_1_x86_64.whl", hash = "sha256:56bbe8be608def61da0b4430562b8d5ff14525f509631a667cfd8405325193da"},
+    {file = "pycocotools-2.0.8-cp312-cp312-win_amd64.whl", hash = "sha256:d004033e760a172b2ccbdf4a62d20d2bcf0c9b40dc3c0d1d724045b0a6944862"},
+    {file = "pycocotools-2.0.8-cp312-cp312-win_arm64.whl", hash = "sha256:87853ca11e9b130e461d6b5284ea475efe35429060a915844e1998d206ba028e"},
+    {file = "pycocotools-2.0.8.tar.gz", hash = "sha256:8f2bcedb786ba26c367a3680f9c4eb5b2ad9dccb2b34eaeb205e0a021e1dfb8d"},
+]
+
+[[package]]
 name = "pyparsing"
 version = "3.1.4"
 requires_python = ">=3.6.8"
@@ -1126,7 +1161,7 @@ files = [
 
 [[package]]
 name = "torchmetrics"
-version = "1.4.2"
+version = "1.4.3"
 requires_python = ">=3.8"
 summary = "PyTorch native Metrics"
 groups = ["default"]
@@ -1137,8 +1172,25 @@ dependencies = [
     "torch>=1.10.0",
 ]
 files = [
-    {file = "torchmetrics-1.4.2-py3-none-any.whl", hash = "sha256:87b9eca51ff6f93985a0f9db509f646cb45425b016f4d2f383d8c28d40dde5b6"},
-    {file = "torchmetrics-1.4.2.tar.gz", hash = "sha256:7a40cbec85e5645090812b87601696b4adf158294ec8c407ae58a71710938b87"},
+    {file = "torchmetrics-1.4.3-py3-none-any.whl", hash = "sha256:76e67490231acef7f70cf36ab129df72fb2b0256dada7051001ab3b9f8699bf4"},
+    {file = "torchmetrics-1.4.3.tar.gz", hash = "sha256:5554a19167e91f543afe82ff58a01059c8eec854359ad22896449c2c8fb0ad89"},
+]
+
+[[package]]
+name = "torchmetrics"
+version = "1.4.3"
+extras = ["detection"]
+requires_python = ">=3.8"
+summary = "PyTorch native Metrics"
+groups = ["default"]
+dependencies = [
+    "pycocotools>2.0.0",
+    "torchmetrics==1.4.3",
+    "torchvision>=0.8",
+]
+files = [
+    {file = "torchmetrics-1.4.3-py3-none-any.whl", hash = "sha256:76e67490231acef7f70cf36ab129df72fb2b0256dada7051001ab3b9f8699bf4"},
+    {file = "torchmetrics-1.4.3.tar.gz", hash = "sha256:5554a19167e91f543afe82ff58a01059c8eec854359ad22896449c2c8fb0ad89"},
 ]
 
 [[package]]
