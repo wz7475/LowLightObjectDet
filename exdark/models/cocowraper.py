@@ -1,17 +1,18 @@
 import os
 import urllib.request
-from typing import Optional
+from typing import Optional, Any
 
 import torch
 import torchvision
 from torch import nn, Tensor
+import lightning as L
 
 from data.labels_storage import coco2coco_like_exdark
 
 
-class ExDarkAsCOCOWrapper(nn.Module):
+class ExDarkAsCOCOWrapper(L.LightningModule):
     def __init__(self, torchvision_detector: nn.Module, categories_filter: dict = coco2coco_like_exdark):
-        super().__init__()
+        super(ExDarkAsCOCOWrapper, self).__init__()
         self.model = torchvision_detector
         self.categories_filter = categories_filter
 
@@ -40,20 +41,24 @@ class ExDarkAsCOCOWrapper(nn.Module):
         outputs = self.model(images, targets)
         return self._filter_detections(outputs)
 
+    def predict_step(self, batch, batch_idx, dataloader_idx=0):
+        return self(batch[0], batch[1])
+
 
 if __name__ == "__main__":
     img_name = "temp.jpg"
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(device)
     urllib.request.urlretrieve("http://farm6.staticflickr.com/5341/9632894369_e180ee5731_z.jpg", img_name)
-    img = torchvision.io.read_image(img_name).float().to(device)
+    img = torchvision.io.read_image(img_name).float()
     core_model = torchvision.models.detection.fasterrcnn_resnet50_fpn(
         weights=torchvision.models.detection.FasterRCNN_ResNet50_FPN_Weights
     )
     wrapped_model = ExDarkAsCOCOWrapper(core_model)
-    wrapped_model.to(device)
     wrapped_model.eval()
-    result = wrapped_model([img, img])
+
+    with torch.no_grad():
+        result = wrapped_model([img, img])
 
     print(result)
 
