@@ -1,9 +1,10 @@
 import os
 import urllib.request
 from typing import Optional, Any
-
+from torchmetrics.detection.mean_ap import MeanAveragePrecision
 import torch
 import torchvision
+from lightning.pytorch.utilities.types import STEP_OUTPUT
 from torch import nn, Tensor
 import lightning as L
 

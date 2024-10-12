@@ -3,24 +3,26 @@ from torch import nn
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
 from tqdm import tqdm
 
-from exdark.config import DEVICE, NUM_WORKERS
-from exdark.datasets import create_valid_test_dataset, create_valid_loader
-from exdark.model import create_sdd300_vgg16_model
-from torch.utils.data import DataLoader
-
+from exdark.config import DEVICE, BATCH_SIZE
+from exdark.datamodule import ExDarkDataModule
+from exdark.models.coremodels import create_sdd300_vgg16_model
 from exdark.models.cocowraper import ExDarkAsCOCOWrapper
 
 
-def validate(valid_data_loader: DataLoader, model: nn.Module):
+def test_model(model: nn.Module, device: torch.device, batch_size: int):
+    """
+    function to evaluate model independently of its architecture and way of training
+    """
+    test_loader = ExDarkDataModule(batch_size=batch_size).test_dataloader()
     model.eval()
-    prog_bar = tqdm(valid_data_loader, total=len(valid_data_loader))
+    prog_bar = tqdm(test_loader, total=len(test_loader))
     all_targets = []
     all_preds = []
     for i, data in enumerate(prog_bar):
         images, targets = data
 
-        images = list(image.to(DEVICE) for image in images)
-        targets = [{k: v.to(DEVICE) for k, v in t.items()} for t in targets]
+        images = list(image.to(device) for image in images)
+        targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
 
         with torch.no_grad():
             outputs = model(images, targets)
@@ -37,7 +39,6 @@ def validate(valid_data_loader: DataLoader, model: nn.Module):
             all_preds.append(preds_dict)
             all_targets.append(true_dict)
 
-
     metric = MeanAveragePrecision()
     metric.update(all_preds, all_targets)
     metric_summary = metric.compute()
@@ -45,19 +46,10 @@ def validate(valid_data_loader: DataLoader, model: nn.Module):
 
 
 if __name__ == '__main__':
-
     core_model = create_sdd300_vgg16_model()
     model = ExDarkAsCOCOWrapper(core_model)
-    model.eval()
     model = model.to(DEVICE)
 
-
-    test_dataset = create_valid_test_dataset(
-        'data/dataset/split/test',
-    )
-    print(len(test_dataset))
-    test_loader = create_valid_loader(test_dataset, num_workers=NUM_WORKERS)
-
-    metric_summary = validate(test_loader, model)
+    metric_summary = test_model(model, DEVICE, BATCH_SIZE)
     print(f"mAP_50: {metric_summary['map_50'] * 100:.3f}")
     print(f"mAP_50_95: {metric_summary['map'] * 100:.3f}")

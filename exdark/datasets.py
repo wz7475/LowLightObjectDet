@@ -4,12 +4,11 @@ import os
 import cv2
 import numpy as np
 import torch
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 
 from exdark.config import (
-    RESIZE_TO, TEST_DIR, BATCH_SIZE
+    RESIZE_TO, TEST_DIR
 )
-from exdark.custom_utils import collate_fn, get_train_transform, get_valid_transform
 from exdark.visulisation.bbox import draw_bbox_from_targets
 
 
@@ -31,8 +30,6 @@ class ExDarkDataset(Dataset):
     def _get_target(self, image: np.array, annot_file_path: str, idx: int):
         boxes = []
         labels = []
-
-        # Original image width and height.
         image_width = image.shape[1]
         image_height = image.shape[0]
 
@@ -98,7 +95,6 @@ class ExDarkDataset(Dataset):
             image_resized = image.copy()
         image_resized /= 255.0
 
-
         annot_filename = image_name.lower() + ".txt"
         annot_file_path = os.path.join(self.dir_path, annot_filename)
 
@@ -121,54 +117,6 @@ class ExDarkDataset(Dataset):
 
     def __len__(self):
         return len(self.all_images)
-
-
-def create_train_dataset(DIR):
-    train_dataset = ExDarkDataset(
-        DIR, RESIZE_TO, RESIZE_TO, get_train_transform()
-    )
-    return train_dataset
-
-
-def create_valid_test_dataset(DIR):
-    valid_dataset = ExDarkDataset(
-        DIR, RESIZE_TO, RESIZE_TO, get_valid_transform()
-    )
-    return valid_dataset
-
-
-def create_train_loader(train_dataset, num_workers=0):
-    train_loader = DataLoader(
-        train_dataset,
-        batch_size=BATCH_SIZE,
-        shuffle=True,
-        num_workers=num_workers,
-        collate_fn=collate_fn,
-        drop_last=True
-    )
-    return train_loader
-
-
-def create_valid_loader(valid_dataset, num_workers=0):
-    valid_loader = DataLoader(
-        valid_dataset,
-        batch_size=BATCH_SIZE,
-        shuffle=False,
-        num_workers=num_workers,
-        collate_fn=collate_fn,
-        drop_last=True
-    )
-    return valid_loader
-
-def create_inference_loader(inference_dataset, num_workers=0):
-    return DataLoader(
-        inference_dataset,
-        batch_size=BATCH_SIZE,
-        shuffle=False,
-        num_workers=num_workers,
-        collate_fn=collate_fn,
-        drop_last=True
-    )
 
 
 if __name__ == '__main__':

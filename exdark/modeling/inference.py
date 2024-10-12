@@ -8,7 +8,7 @@ import torch
 from exdark.config import (
     DEVICE
 )
-from exdark.model import create_sdd300_vgg16_model
+from exdark.models.coremodels import create_sdd300_vgg16_model
 from exdark.models.cocowraper import ExDarkAsCOCOWrapper
 from exdark.visulisation.bbox import draw_bbox_from_preds
 

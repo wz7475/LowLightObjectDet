@@ -36,19 +36,16 @@ class ExDarkDataModule(L.LightningDataModule):
                 'label_fields': ['labels']
             })
         self.predict_transforms = A.Compose([ToTensorV2(p=1.0)])
+        self.train_dataset = ExDarkDataset(
+            TRAIN_DIR, RESIZE_TO, RESIZE_TO, self.train_transforms
+        )
+        self.val_dataset = ExDarkDataset(
+            VALID_DIR, RESIZE_TO, RESIZE_TO, self.eval_transforms
+        )
+        self.test_dataset = ExDarkDataset(
+            TEST_DIR, RESIZE_TO, RESIZE_TO, self.eval_transforms
+        )
 
-    def setup(self, stage: str) -> None:
-        if stage == "fit":
-            self.train_dataset = ExDarkDataset(
-                TRAIN_DIR, RESIZE_TO, RESIZE_TO, self.train_transforms
-            )
-            self.val_dataset = ExDarkDataset(
-                VALID_DIR, RESIZE_TO, RESIZE_TO, self.eval_transforms
-            )
-        if stage == "test":
-            self.test_dataset = ExDarkDataset(
-                TEST_DIR, RESIZE_TO, RESIZE_TO, self.eval_transforms
-            )
 
     def setup_predict_data(self, img_dir: str):
         self.predict_datset = ExDarkDataset(img_dir, RESIZE_TO, RESIZE_TO, transforms=self.predict_transforms)
