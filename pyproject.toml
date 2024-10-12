@@ -29,3 +29,9 @@ build-backend = "pdm.backend"
 
 [tool.pdm]
 distribution = true
+
+[tool.pdm.dev-dependencies]
+dev = [
+    "jupyter>=1.1.1",
+    "nbconvert>=7.16.4",
+]

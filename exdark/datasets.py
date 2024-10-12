@@ -28,22 +28,7 @@ class ExDarkDataset(Dataset):
         self.all_images = [image_path.split(os.path.sep)[-1] for image_path in self.all_image_paths]
         self.all_images = sorted(self.all_images)
 
-    def __getitem__(self, idx):
-        # Capture the image name and the full image path.
-        image_name = self.all_images[idx]
-        image_name = image_name
-        image_path = os.path.join(self.dir_path, image_name)
-
-        # Read and preprocess the image.
-        image = cv2.imread(image_path).astype(np.float32)
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB).astype(np.float32)
-        image_resized = cv2.resize(image, (self.width, self.height))
-        image_resized /= 255.0
-
-        # Capture the corresponding file for getting the annotations.
-        annot_filename = image_name.lower() + ".txt"
-        annot_file_path = os.path.join(self.dir_path, annot_filename)
-
+    def _get_target(self, image: np.array, annot_file_path: str, idx: int):
         boxes = []
         labels = []
 
@@ -96,17 +81,42 @@ class ExDarkDataset(Dataset):
         target["iscrowd"] = iscrowd  # iscrowd set to True indicates crowd i.e. to ignore this objects
         image_id = torch.tensor([idx])
         target["image_id"] = image_id
+        return target
+
+    def __getitem__(self, idx):
+        # Capture the image name and the full image path.
+        image_name = self.all_images[idx]
+        image_name = image_name
+        image_path = os.path.join(self.dir_path, image_name)
+
+        # Read and preprocess the image.
+        image = cv2.imread(image_path).astype(np.float32)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB).astype(np.float32)
+        if self.height and self.width:
+            image_resized = cv2.resize(image, (self.width, self.height))
+        else:
+            image_resized = image.copy()
+        image_resized /= 255.0
+
+
+        annot_filename = image_name.lower() + ".txt"
+        annot_file_path = os.path.join(self.dir_path, annot_filename)
+
+        target = self._get_target(image, annot_file_path, idx) if os.path.exists(annot_file_path) else None
 
         # Apply the image transforms.
         if self.transforms:
-            sample = self.transforms(image=image_resized,
-                                     bboxes=target['boxes'],
-                                     labels=labels)
-            image_resized = sample['image']
-            target['boxes'] = torch.Tensor(sample['bboxes'])
-
-        if np.isnan((target['boxes']).numpy()).any() or target['boxes'].shape == torch.Size([0]):
-            target['boxes'] = torch.zeros((0, 4), dtype=torch.int64)
+            if target:
+                sample = self.transforms(image=image_resized,
+                                         bboxes=target['boxes'],
+                                         labels=target["labels"])
+                target['boxes'] = torch.Tensor(sample['bboxes'])
+                image_resized = sample['image']
+                if np.isnan((target['boxes']).numpy()).any() or target['boxes'].shape == torch.Size([0]):
+                    target['boxes'] = torch.zeros((0, 4), dtype=torch.int64)
+            else:
+                sample = self.transforms(image=image_resized)
+                image_resized = sample['image']
         return image_resized, target
 
     def __len__(self):
@@ -120,7 +130,7 @@ def create_train_dataset(DIR):
     return train_dataset
 
 
-def create_valid_dataset(DIR):
+def create_valid_test_dataset(DIR):
     valid_dataset = ExDarkDataset(
         DIR, RESIZE_TO, RESIZE_TO, get_valid_transform()
     )
@@ -149,6 +159,16 @@ def create_valid_loader(valid_dataset, num_workers=0):
         drop_last=True
     )
     return valid_loader
+
+def create_inference_loader(inference_dataset, num_workers=0):
+    return DataLoader(
+        inference_dataset,
+        batch_size=BATCH_SIZE,
+        shuffle=False,
+        num_workers=num_workers,
+        collate_fn=collate_fn,
+        drop_last=True
+    )
 
 
 if __name__ == '__main__':

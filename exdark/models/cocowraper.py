@@ -42,7 +42,7 @@ class ExDarkAsCOCOWrapper(L.LightningModule):
         return self._filter_detections(outputs)
 
     def predict_step(self, batch, batch_idx, dataloader_idx=0):
-        return self(batch[0], batch[1])
+        return self(batch[0])
 
 
 if __name__ == "__main__":

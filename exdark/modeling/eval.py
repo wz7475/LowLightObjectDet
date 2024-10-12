@@ -4,7 +4,7 @@ from torchmetrics.detection.mean_ap import MeanAveragePrecision
 from tqdm import tqdm
 
 from exdark.config import DEVICE, NUM_WORKERS
-from exdark.datasets import create_valid_dataset, create_valid_loader
+from exdark.datasets import create_valid_test_dataset, create_valid_loader
 from exdark.model import create_sdd300_vgg16_model
 from torch.utils.data import DataLoader
 
@@ -52,7 +52,7 @@ if __name__ == '__main__':
     model = model.to(DEVICE)
 
 
-    test_dataset = create_valid_dataset(
+    test_dataset = create_valid_test_dataset(
         'data/dataset/split/test',
     )
     print(len(test_dataset))

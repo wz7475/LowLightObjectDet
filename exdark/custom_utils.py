@@ -90,6 +90,8 @@ def get_valid_transform():
         'label_fields': ['labels']
     })
 
+def get_inference_transforms():
+    return A.Compose([ToTensorV2(p=1.0)])
 
 def show_tranformed_image(train_loader):
     """

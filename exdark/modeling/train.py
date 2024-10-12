@@ -19,9 +19,9 @@ from exdark.custom_utils import (
 )
 from tqdm.auto import tqdm
 from exdark.datasets import (
-    create_train_dataset, 
-    create_valid_dataset, 
-    create_train_loader, 
+    create_train_dataset,
+    create_valid_test_dataset,
+    create_train_loader,
     create_valid_loader
 )
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
@@ -107,7 +107,7 @@ def validate(valid_data_loader, model):
 if __name__ == '__main__':
     os.makedirs('outputs', exist_ok=True)
     train_dataset = create_train_dataset(TRAIN_DIR)
-    valid_dataset = create_valid_dataset(VALID_DIR)
+    valid_dataset = create_valid_test_dataset(VALID_DIR)
     train_loader = create_train_loader(train_dataset, NUM_WORKERS)
     valid_loader = create_valid_loader(valid_dataset, NUM_WORKERS)
     print(f"Number of training samples: {len(train_dataset)}")

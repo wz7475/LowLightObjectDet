@@ -29,7 +29,6 @@ def run_inference(img_paths: list[str], model: torch.nn.Module, confidence_thr: 
         draw_bbox_from_preds(image, outputs)
 
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
