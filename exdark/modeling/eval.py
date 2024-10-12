@@ -2,6 +2,7 @@ import torch
 from torch import nn
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
 from tqdm import tqdm
+from torch.utils.tensorboard import SummaryWriter
 
 from exdark.config import DEVICE, BATCH_SIZE
 from exdark.datamodule import ExDarkDataModule
@@ -9,7 +10,7 @@ from exdark.models.coremodels import create_sdd300_vgg16_model
 from exdark.models.cocowraper import ExDarkAsCOCOWrapper
 
 
-def test_model(model: nn.Module, device: torch.device, batch_size: int):
+def test_model(model: nn.Module, device: torch.device, batch_size: int, writer: SummaryWriter):
     """
     function to evaluate model independently of its architecture and way of training
     """
@@ -42,6 +43,7 @@ def test_model(model: nn.Module, device: torch.device, batch_size: int):
     metric = MeanAveragePrecision()
     metric.update(all_preds, all_targets)
     metric_summary = metric.compute()
+    writer.add_scalars("mAP", dict((k, v.item()) for k, v in metric_summary.items() if k != "classes"))
     return metric_summary
 
 
@@ -50,6 +52,7 @@ if __name__ == '__main__':
     model = ExDarkAsCOCOWrapper(core_model)
     model = model.to(DEVICE)
 
-    metric_summary = test_model(model, DEVICE, BATCH_SIZE)
+    with SummaryWriter("ExDarkASCOCOWrapper evaluation") as writer:
+        metric_summary = test_model(model, DEVICE, BATCH_SIZE, writer)
     print(f"mAP_50: {metric_summary['map_50'] * 100:.3f}")
     print(f"mAP_50_95: {metric_summary['map'] * 100:.3f}")
