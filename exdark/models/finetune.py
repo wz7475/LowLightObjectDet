@@ -13,6 +13,7 @@ import torchvision
 from dotenv import load_dotenv
 from lightning.pytorch.loggers import NeptuneLogger
 from lightning.pytorch.utilities.types import STEP_OUTPUT
+from lightning.pytorch.callbacks import ModelCheckpoint
 from torch import Tensor
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
 
@@ -73,17 +74,29 @@ class FasterRCNN(L.LightningModule):
 
 
 if __name__ == "__main__":
+    # data
     load_dotenv()
-    exdark_data = ExDarkDataModule(batch_size=1)
+    exdark_data = ExDarkDataModule(batch_size=32)
+    # loggger
     neptune_logger = NeptuneLogger(
         api_key=os.environ["NEPTUN_TOKEN"],
         project="wz7475/exdark",
     )
-
+    # checkpoints
+    checkpoints = ModelCheckpoint(
+        dirpath="checkpoints",
+        filename="model-{epoch:02d}-{val_loss:.2f}",
+        save_top_k=3,
+        mode="max",
+        monitor="val_mAP",
+        save_last=True,
+        every_n_epochs=2,
+    )
     model = FasterRCNN()
     trainer = L.Trainer(
         accelerator="gpu",
-        max_epochs=1,
+        max_epochs=100,
         logger=neptune_logger,
+        callbacks=[checkpoints],
     )
     trainer.fit(model, datamodule=exdark_data)
