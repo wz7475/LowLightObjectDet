@@ -11,3 +11,5 @@ imageclasslist.txt*
 .pdm-python
 __MACOSX
 temp
+lightning_logs
+lightning_logs_local

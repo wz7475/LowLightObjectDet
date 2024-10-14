@@ -20,9 +20,9 @@ class ExDarkDataModule(L.LightningDataModule):
         self.batch_size = batch_size
         self.train_transforms = A.Compose(
             [
-                A.RandomCrop(width=450, height=450),
                 A.HorizontalFlip(p=0.5),
                 A.RandomBrightnessContrast(p=0.2),
+                ToTensorV2(p=1.0),  # has to be last transformation
             ],
             bbox_params={
                 'format': 'pascal_voc',
@@ -38,6 +38,7 @@ class ExDarkDataModule(L.LightningDataModule):
         self.predict_transforms = A.Compose([ToTensorV2(p=1.0)])
         self.train_dataset = ExDarkDataset(
             TRAIN_DIR, RESIZE_TO, RESIZE_TO, self.train_transforms
+            # "data/dataset/split/tiny", RESIZE_TO, RESIZE_TO, self.train_transforms
         )
         self.val_dataset = ExDarkDataset(
             VALID_DIR, RESIZE_TO, RESIZE_TO, self.eval_transforms
