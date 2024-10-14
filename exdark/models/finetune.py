@@ -5,12 +5,13 @@ FasterRCNN model:
 """
 
 import os
-import urllib.request
-from typing import Optional, Any
+from typing import Optional
 
 import lightning as L
 import torch
 import torchvision
+from dotenv import load_dotenv
+from lightning.pytorch.loggers import NeptuneLogger
 from lightning.pytorch.utilities.types import STEP_OUTPUT
 from torch import Tensor
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
@@ -72,8 +73,17 @@ class FasterRCNN(L.LightningModule):
 
 
 if __name__ == "__main__":
+    load_dotenv()
     exdark_data = ExDarkDataModule(batch_size=1)
+    neptune_logger = NeptuneLogger(
+        api_key=os.environ["NEPTUN_TOKEN"],
+        project="wz7475/exdark",
+    )
 
-    wrapped_model = FasterRCNN()
-    trainer = L.Trainer(accelerator="gpu", max_epochs=20, log_every_n_steps=4)
-    trainer.fit(wrapped_model, datamodule=exdark_data)
+    model = FasterRCNN()
+    trainer = L.Trainer(
+        accelerator="gpu",
+        max_epochs=1,
+        logger=neptune_logger,
+    )
+    trainer.fit(model, datamodule=exdark_data)

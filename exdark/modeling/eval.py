@@ -1,4 +1,5 @@
 import torch
+import torchvision
 from torch import nn
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
 from tqdm import tqdm
@@ -48,7 +49,8 @@ def test_model(model: nn.Module, device: torch.device, batch_size: int, writer: 
 
 
 if __name__ == '__main__':
-    core_model = create_sdd300_vgg16_model()
+    core_model = torchvision.models.detection.fasterrcnn_resnet50_fpn_v2(
+        weights=torchvision.models.detection.FasterRCNN_ResNet50_FPN_V2_Weights.DEFAULT)
     model = ExDarkAsCOCOWrapper(core_model)
     model = model.to(DEVICE)
 
@@ -56,3 +58,4 @@ if __name__ == '__main__':
         metric_summary = test_model(model, DEVICE, BATCH_SIZE, writer)
     print(f"mAP_50: {metric_summary['map_50'] * 100:.3f}")
     print(f"mAP_50_95: {metric_summary['map'] * 100:.3f}")
+    print(metric_summary)
