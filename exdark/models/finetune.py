@@ -5,15 +5,15 @@ FasterRCNN model:
 """
 
 import os
-from typing import Optional
+from typing import Optional, Union, List
 
 import lightning as L
 import torch
 import torchvision
 from dotenv import load_dotenv
-from lightning.pytorch.loggers import NeptuneLogger
-from lightning.pytorch.utilities.types import STEP_OUTPUT
 from lightning.pytorch.callbacks import ModelCheckpoint
+from lightning.pytorch.core.module import MODULE_OPTIMIZERS
+from lightning.pytorch.utilities.types import STEP_OUTPUT, LRSchedulerPLType
 from torch import Tensor
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
 
@@ -36,9 +36,6 @@ class FasterRCNN(L.LightningModule):
         in_features = model.roi_heads.box_predictor.cls_score.in_features
         model.roi_heads.box_predictor = torchvision.models.detection.faster_rcnn.FastRCNNPredictor(
             in_channels=in_features, num_classes=num_classes)
-        # freeze backbone
-        for param in model.backbone.parameters():
-            param.requires_grad = False
         return model
 
     def forward(
@@ -69,23 +66,29 @@ class FasterRCNN(L.LightningModule):
         self.metric.reset()
 
     def configure_optimizers(self):
+        lr = 0.00005
+        params = []
+        params.append({
+            "params": [p for n, p in model.named_parameters() if "backbone" in n],
+            "lr": lr / 10,
+        })
+        params.append({
+            "params": [p for n, p in model.named_parameters() if "backbone" not in n],
+            "lr": lr,
+        })
         params = [param for param in self.model.parameters() if param.requires_grad]
-        return torch.optim.SGD(params, lr=0.005, momentum=0.9, weight_decay=0.0005)
+        optimizer = torch.optim.SGD(params, momentum=0.9, weight_decay=0.0005)
+        lr_scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.2)
+        return [optimizer], [lr_scheduler]
 
 
 if __name__ == "__main__":
     # data
     load_dotenv()
-    exdark_data = ExDarkDataModule(batch_size=32)
-    # loggger
-    neptune_logger = NeptuneLogger(
-        api_key=os.environ["NEPTUN_TOKEN"],
-        project="wz7475/exdark",
-    )
+    os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:512"
+    exdark_data = ExDarkDataModule(batch_size=16)
     # checkpoints
     checkpoints = ModelCheckpoint(
-        dirpath="checkpoints",
-        filename="model-{epoch:02d}-{val_loss:.2f}",
         save_top_k=3,
         mode="max",
         monitor="val_mAP",
@@ -95,8 +98,7 @@ if __name__ == "__main__":
     model = FasterRCNN()
     trainer = L.Trainer(
         accelerator="gpu",
-        max_epochs=100,
-        logger=neptune_logger,
+        max_epochs=150,
         callbacks=[checkpoints],
     )
     trainer.fit(model, datamodule=exdark_data)

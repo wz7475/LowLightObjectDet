@@ -18,17 +18,7 @@ class ExDarkDataModule(L.LightningDataModule):
     def __init__(self, batch_size: int):
         super().__init__()
         self.batch_size = batch_size
-        self.train_transforms = A.Compose(
-            [
-                A.HorizontalFlip(p=0.5),
-                A.RandomBrightnessContrast(p=0.2),
-                ToTensorV2(p=1.0),  # has to be last transformation
-            ],
-            bbox_params={
-                'format': 'pascal_voc',
-                'label_fields': ['labels']
-            }
-        )
+        self.train_transforms = self.get_train_transformations()
         self.eval_transforms = A.Compose(
             [ToTensorV2(p=1.0)],
             bbox_params={
@@ -47,6 +37,15 @@ class ExDarkDataModule(L.LightningDataModule):
             TEST_DIR, RESIZE_TO, RESIZE_TO, self.eval_transforms
         )
 
+    @staticmethod
+    def get_train_transformations() -> A.Compose:
+        return A.Compose([
+            A.Perspective(p=0.1),
+            A.HorizontalFlip(p=0.5),
+            A.RandomBrightnessContrast(p=0.5),
+            A.HueSaturationValue(p=0.1),
+            ToTensorV2(),
+        ], bbox_params=A.BboxParams(format='pascal_voc', label_fields=['labels']))
 
     def setup_predict_data(self, img_dir: str):
         self.predict_datset = ExDarkDataset(img_dir, RESIZE_TO, RESIZE_TO, transforms=self.predict_transforms)
