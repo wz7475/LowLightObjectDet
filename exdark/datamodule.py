@@ -19,8 +19,10 @@ class ExDarkDataModule(L.LightningDataModule):
         super().__init__()
         self.batch_size = batch_size
         self.train_transforms = self.get_train_transformations()
-        self.eval_transforms = A.Compose(
-            [ToTensorV2(p=1.0)],
+        self.eval_transforms = A.Compose([
+            A.RandomGamma(gamma_limit=(80, 120), p=1.0),
+            ToTensorV2(p=1.0)
+        ],
             bbox_params={
                 'format': 'pascal_voc',
                 'label_fields': ['labels']
@@ -40,6 +42,7 @@ class ExDarkDataModule(L.LightningDataModule):
     @staticmethod
     def get_train_transformations() -> A.Compose:
         return A.Compose([
+            A.RandomGamma(gamma_limit=(80, 120), p=1.0),
             A.Perspective(p=0.1),
             A.HorizontalFlip(p=0.5),
             A.RandomBrightnessContrast(p=0.5),
