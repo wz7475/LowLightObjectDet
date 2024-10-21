@@ -5,15 +5,14 @@ FasterRCNN model:
 """
 
 import os
-from typing import Optional, Union, List
+from typing import Optional
 
 import lightning as L
 import torch
 import torchvision
 from dotenv import load_dotenv
-from lightning.pytorch.callbacks import ModelCheckpoint
-from lightning.pytorch.core.module import MODULE_OPTIMIZERS
-from lightning.pytorch.utilities.types import STEP_OUTPUT, LRSchedulerPLType
+from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor
+from lightning.pytorch.utilities.types import STEP_OUTPUT
 from torch import Tensor
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
 
@@ -66,7 +65,7 @@ class FasterRCNN(L.LightningModule):
         self.metric.reset()
 
     def configure_optimizers(self):
-        lr = 0.00005
+        lr = 0.005
         params = []
         params.append({
             "params": [p for n, p in model.named_parameters() if "backbone" in n],
@@ -78,7 +77,7 @@ class FasterRCNN(L.LightningModule):
         })
         params = [param for param in self.model.parameters() if param.requires_grad]
         optimizer = torch.optim.SGD(params, momentum=0.9, weight_decay=0.0005)
-        lr_scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.2)
+        lr_scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
         return [optimizer], [lr_scheduler]
 
 
@@ -95,10 +94,11 @@ if __name__ == "__main__":
         save_last=True,
         every_n_epochs=2,
     )
+    lr_monitor = LearningRateMonitor(logging_interval='step', log_momentum=True)
     model = FasterRCNN()
     trainer = L.Trainer(
         accelerator="gpu",
         max_epochs=150,
-        callbacks=[checkpoints],
+        callbacks=[checkpoints, lr_monitor],
     )
     trainer.fit(model, datamodule=exdark_data)
