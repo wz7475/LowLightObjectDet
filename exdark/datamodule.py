@@ -19,14 +19,7 @@ class ExDarkDataModule(L.LightningDataModule):
         super().__init__()
         self.batch_size = batch_size
         self.train_transforms = self.get_train_transformations()
-        self.eval_transforms = A.Compose([
-            A.RandomGamma(gamma_limit=(80, 120), p=1.0),
-            ToTensorV2(p=1.0)
-        ],
-            bbox_params={
-                'format': 'pascal_voc',
-                'label_fields': ['labels']
-            })
+        self.eval_transforms = self.get_eval_transformations()
         self.predict_transforms = A.Compose([ToTensorV2(p=1.0)])
         self.train_dataset = ExDarkDataset(
             TRAIN_DIR, RESIZE_TO, RESIZE_TO, self.train_transforms
@@ -42,13 +35,22 @@ class ExDarkDataModule(L.LightningDataModule):
     @staticmethod
     def get_train_transformations() -> A.Compose:
         return A.Compose([
-            A.RandomGamma(gamma_limit=(80, 120), p=1.0),
             A.Perspective(p=0.1),
             A.HorizontalFlip(p=0.5),
             A.RandomBrightnessContrast(p=0.5),
             A.HueSaturationValue(p=0.1),
             ToTensorV2(),
         ], bbox_params=A.BboxParams(format='pascal_voc', label_fields=['labels']))
+
+    @staticmethod
+    def get_eval_transformations() -> A.Compose:
+        return A.Compose([
+            ToTensorV2(p=1.0)
+        ],
+            bbox_params={
+                'format': 'pascal_voc',
+                'label_fields': ['labels']
+            })
 
     def setup_predict_data(self, img_dir: str):
         self.predict_datset = ExDarkDataset(img_dir, RESIZE_TO, RESIZE_TO, transforms=self.predict_transforms)
@@ -72,3 +74,45 @@ class ExDarkDataModule(L.LightningDataModule):
             return DataLoader(self.predict_datset, batch_size=self.batch_size, collate_fn=self._collate_fn)
         except AttributeError:
             raise PredictionError()
+
+
+class BrightenExDarkDataModule(ExDarkDataModule):
+    def __init__(self, batch_size: int):
+        super().__init__(batch_size)
+        self.train_dataset = ExDarkDataset(
+            TRAIN_DIR, RESIZE_TO, RESIZE_TO, self.train_transforms
+            # "data/dataset/split/tiny", RESIZE_TO, RESIZE_TO, self.train_transforms
+        )
+        self.val_dataset = ExDarkDataset(
+            VALID_DIR, RESIZE_TO, RESIZE_TO, self.eval_transforms
+        )
+        self.test_dataset = ExDarkDataset(
+            TEST_DIR, RESIZE_TO, RESIZE_TO, self.eval_transforms
+        )
+
+
+class GammaBrightenExDarkDataModule(ExDarkDataModule):
+    def __init__(self, batch_size: int):
+        super().__init__(batch_size)
+
+    @staticmethod
+    def get_train_transformations() -> A.Compose:
+        return A.Compose([
+            A.RandomGamma(gamma_limit=(80, 120), p=1.0),
+            A.Perspective(p=0.1),
+            A.HorizontalFlip(p=0.5),
+            A.RandomBrightnessContrast(p=0.5),
+            A.HueSaturationValue(p=0.1),
+            ToTensorV2(),
+        ], bbox_params=A.BboxParams(format='pascal_voc', label_fields=['labels']))
+
+    @staticmethod
+    def get_eval_transformations() -> A.Compose:
+        return A.Compose([
+            A.RandomGamma(gamma_limit=(80, 120), p=1.0),
+            ToTensorV2(p=1.0)
+        ],
+            bbox_params={
+                'format': 'pascal_voc',
+                'label_fields': ['labels']
+            })

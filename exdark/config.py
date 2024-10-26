@@ -12,6 +12,9 @@ DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device('cp
 TRAIN_DIR = 'data/dataset/split/train'
 VALID_DIR = 'data/dataset/split/val'
 TEST_DIR = 'data/dataset/split/test'
+TRAIN_DIR_LIGHTEN = 'data/dataset/split/train_lighten'
+VALID_DIR_LIGHTEN = 'data/dataset/split/val_lighten'
+TEST_DIR_LIGHTEN = 'data/dataset/split/test_lighten'
 
 
 CLASSES_COCO = torchvision.models.detection.SSD300_VGG16_Weights.COCO_V1.meta["categories"]
