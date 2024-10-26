@@ -17,7 +17,7 @@ from torch import Tensor
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
 
 from data.labels_storage import exdark_coco_like_labels
-from exdark.datamodule import ExDarkDataModule
+from exdark.datamodule import ExDarkDataModule, BrightenExDarkDataModule
 
 
 class FasterRCNN(L.LightningModule):
@@ -64,6 +64,15 @@ class FasterRCNN(L.LightningModule):
         self.log("val_mAP_75", mAP['map_75'], prog_bar=True)
         self.metric.reset()
 
+    def on_fit_start(self) -> None:
+        datamodule = self.trainer.datamodule
+        self.logger.log_hyperparams({
+            "datamodule_name": datamodule.__class__.__name__,
+            "batch_size": datamodule.batch_size,
+            "dataset_size": len(datamodule.train_dataset)
+        })
+        print("logged params")
+
     def configure_optimizers(self):
         lr = 0.005
         params = []
@@ -85,20 +94,20 @@ if __name__ == "__main__":
     # data
     load_dotenv()
     os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:512"
-    exdark_data = ExDarkDataModule(batch_size=16)
+    exdark_data = BrightenExDarkDataModule(batch_size=16)
     # checkpoints
     checkpoints = ModelCheckpoint(
         save_top_k=3,
         mode="max",
         monitor="val_mAP",
         save_last=True,
-        every_n_epochs=2,
+        every_n_epochs=1,
     )
     lr_monitor = LearningRateMonitor(logging_interval='step', log_momentum=True)
     model = FasterRCNN()
     trainer = L.Trainer(
         accelerator="gpu",
-        max_epochs=150,
+        max_epochs=1,
         callbacks=[checkpoints, lr_monitor],
     )
     trainer.fit(model, datamodule=exdark_data)
