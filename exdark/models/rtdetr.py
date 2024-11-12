@@ -1,11 +1,15 @@
+import os
 from typing import Optional
 
 import lightning as L
 import torch
+import wandb
+from dotenv import load_dotenv
 from lightning import LightningModule
 from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor
+from lightning.pytorch.loggers import WandbLogger
 from torch import Tensor
-from transformers import RTDetrForObjectDetection, AutoModelForObjectDetection
+from transformers import AutoModelForObjectDetection
 
 from data.labels_storage import exdark_coco_like_labels
 from exdark.datamodule import ExDarkDataModule
@@ -59,13 +63,13 @@ class RTDetr(LightningModule):
     def training_step(self, batch, batch_idx):
         outputs = self.common_step(batch, batch_idx)
         loss, loss_dict = outputs.loss, outputs.loss_dict
-        self.log("train_loss", loss)
+        self.log("train_loss", loss, prog_bar=True)
         return loss
 
     def validation_step(self, batch, batch_idx):
         outputs = self.common_step(batch, batch_idx)
         loss = outputs.loss
-        self.log("val_loss", loss)
+        self.log("val_loss", loss, prog_bar=True)
         return loss
 
     def on_validation_epoch_end(self) -> None:
@@ -95,7 +99,8 @@ class RTDetr(LightningModule):
 
 if __name__ == "__main__":
     # data
-    exdark_data = ExDarkDataModule(batch_size=16)
+    batch_size = 16
+    exdark_data = ExDarkDataModule(batch_size)
 
     # model
     model = RTDetr(lr=1e-4, lr_backbone=1e-5, weight_decay=1e-4)
@@ -108,11 +113,19 @@ if __name__ == "__main__":
         save_last=True,
         every_n_epochs=1,
     )
+
+    # logging
+    load_dotenv()
+    wandb.login(key=os.environ["WANDB_TOKEN"])
+    wandb_logger = WandbLogger(project='exdark')
+    wandb_logger.experiment.config["batch_size"] = batch_size
     lr_monitor = LearningRateMonitor(logging_interval='step', log_momentum=True)
+
+    # training
     trainer = L.Trainer(
         accelerator="gpu",
-        max_epochs=2,
+        max_epochs=100,
         callbacks=[checkpoints, lr_monitor],
+        logger=wandb_logger,
     )
-    # training
     trainer.fit(model, datamodule=exdark_data)
