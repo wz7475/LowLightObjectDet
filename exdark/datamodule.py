@@ -4,7 +4,7 @@ from albumentations.pytorch import ToTensorV2
 from lightning.pytorch.utilities.types import EVAL_DATALOADERS, TRAIN_DATALOADERS
 from torch.utils.data import DataLoader
 
-from exdark.config import RESIZE_TO, TRAIN_DIR, VALID_DIR, TEST_DIR
+from exdark.config import RESIZE_TO, TRAIN_DIR, VALID_DIR, TEST_DIR, TRAIN_DIR_LIGHTEN, TEST_DIR_LIGHTEN, VALID_DIR_LIGHTEN
 from exdark.datasets import ExDarkDataset
 
 
@@ -35,10 +35,10 @@ class ExDarkDataModule(L.LightningDataModule):
     @staticmethod
     def get_train_transformations() -> A.Compose:
         return A.Compose([
-            A.Perspective(p=0.1),
-            A.HorizontalFlip(p=0.5),
-            A.RandomBrightnessContrast(p=0.5),
-            A.HueSaturationValue(p=0.1),
+            # A.Perspective(p=0.1),
+            # A.HorizontalFlip(p=0.5),
+            # A.RandomBrightnessContrast(p=0.5),
+            # A.HueSaturationValue(p=0.1),
             ToTensorV2(),
         ], bbox_params=A.BboxParams(format='pascal_voc', label_fields=['labels']))
 

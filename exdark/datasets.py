@@ -74,6 +74,7 @@ class ExDarkDataset(Dataset):
         target = {}
         target["boxes"] = boxes
         target["labels"] = labels
+        target["size"] = torch.tensor([self.height, self.width])
         target["area"] = area  # area can be used to for evaluation to group small, medium and large objects
         target["iscrowd"] = iscrowd  # iscrowd set to True indicates crowd i.e. to ignore this objects
         image_id = torch.tensor([idx])
