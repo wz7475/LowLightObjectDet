@@ -23,6 +23,7 @@ from exdark.datamodule import ExDarkDataModule, BrightenExDarkDataModule
 class FasterRCNN(L.LightningModule):
     def __init__(self, num_classes=(len(exdark_coco_like_labels))):
         super(FasterRCNN, self).__init__()
+        self.weight_decay = 0.005
         self.model = self._get_faster_rcnn(num_classes)
         self.metric = MeanAveragePrecision()
 
@@ -85,8 +86,8 @@ class FasterRCNN(L.LightningModule):
             "lr": lr,
         })
         params = [param for param in self.model.parameters() if param.requires_grad]
-        optimizer = torch.optim.SGD(params, momentum=0.9, weight_decay=0.0005)
-        lr_scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
+        optimizer = torch.optim.SGD(params, momentum=0.9, weight_decay=self.weight_decay)
+        lr_scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.99)
         return [optimizer], [lr_scheduler]
 
 
@@ -107,7 +108,7 @@ if __name__ == "__main__":
     model = FasterRCNN()
     trainer = L.Trainer(
         accelerator="gpu",
-        max_epochs=1,
+        max_epochs=150,
         callbacks=[checkpoints, lr_monitor],
     )
     trainer.fit(model, datamodule=exdark_data)
