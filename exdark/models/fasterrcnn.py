@@ -10,14 +10,16 @@ from typing import Optional
 import lightning as L
 import torch
 import torchvision
+import wandb
 from dotenv import load_dotenv
 from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor
+from lightning.pytorch.loggers import WandbLogger
 from lightning.pytorch.utilities.types import STEP_OUTPUT
 from torch import Tensor
-from torchmetrics.detection.mean_ap import MeanAveragePrecision
+from torchmetrics.detection import MeanAveragePrecision
 
 from data.labels_storage import exdark_coco_like_labels
-from exdark.datamodule import ExDarkDataModule, BrightenExDarkDataModule
+from exdark.datamodule import ExDarkDataModule
 
 
 class FasterRCNN(L.LightningModule):
@@ -41,6 +43,14 @@ class FasterRCNN(L.LightningModule):
     def forward(
             self, images: list[Tensor], targets: Optional[list[dict[str, Tensor]]] = None
     ):
+        if targets:
+            for target in targets:
+                try:
+                    assert target["boxes"].size(0) == target["labels"].size(0), "Mismatched boxes and labels"
+                except AssertionError:
+                    print(f"boxes: {target['boxes'].size(0)}")
+                    print(f"labels: {target['labels'].size(0)}")
+                    raise AssertionError()
         return self.model(images, targets)
 
     def predict_step(self, batch, batch_idx, dataloader_idx=0):
@@ -48,7 +58,7 @@ class FasterRCNN(L.LightningModule):
 
     def training_step(self, batch, batch_idx) -> STEP_OUTPUT:
         images, targets = batch
-        loss_dict = self.model(images, targets)
+        loss_dict = self.forward(images, targets)
         total_loss = sum(loss for loss in loss_dict.values())
         self.log("train_loss", total_loss)
         return total_loss
@@ -95,20 +105,27 @@ if __name__ == "__main__":
     # data
     load_dotenv()
     os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:512"
-    exdark_data = BrightenExDarkDataModule(batch_size=16)
+    batch_size = 16
+    exdark_data = ExDarkDataModule(batch_size=batch_size)
     # checkpoints
     checkpoints = ModelCheckpoint(
-        save_top_k=3,
+        save_top_k=1,
         mode="max",
         monitor="val_mAP",
         save_last=True,
         every_n_epochs=1,
     )
     lr_monitor = LearningRateMonitor(logging_interval='step', log_momentum=True)
+    load_dotenv()
+    wandb.login(key=os.environ["WANDB_TOKEN"])
+    wandb_logger = WandbLogger(project='exdark')
+    # TODO: add datamodule specs logging
+    wandb_logger.experiment.config["batch_size"] = batch_size
     model = FasterRCNN()
     trainer = L.Trainer(
         accelerator="gpu",
-        max_epochs=150,
+        max_epochs=80,
         callbacks=[checkpoints, lr_monitor],
+        logger=wandb_logger
     )
     trainer.fit(model, datamodule=exdark_data)
