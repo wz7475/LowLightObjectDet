@@ -11,9 +11,9 @@ import lightning as L
 from data.labels_storage import coco2coco_like_exdark
 
 
-class ExDarkAsCOCOWrapper(L.LightningModule):
+class ExDarkFasterRCNNWrapper(L.LightningModule):
     def __init__(self, torchvision_detector: nn.Module, categories_filter: dict = coco2coco_like_exdark):
-        super(ExDarkAsCOCOWrapper, self).__init__()
+        super(ExDarkFasterRCNNWrapper, self).__init__()
         self.model = torchvision_detector
         self.categories_filter = categories_filter
 
@@ -55,7 +55,7 @@ if __name__ == "__main__":
     core_model = torchvision.models.detection.fasterrcnn_resnet50_fpn(
         weights=torchvision.models.detection.FasterRCNN_ResNet50_FPN_Weights
     )
-    wrapped_model = ExDarkAsCOCOWrapper(core_model)
+    wrapped_model = ExDarkFasterRCNNWrapper(core_model)
     wrapped_model.eval()
 
     with torch.no_grad():
