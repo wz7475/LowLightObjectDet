@@ -4,7 +4,7 @@ import lightning as L
 import torch
 from PIL import ImageDraw
 from torch import Tensor
-from transformers import RTDetrForObjectDetection, RTDetrImageProcessor
+from transformers import RTDetrForObjectDetection, RTDetrImageProcessor, AutoModelForObjectDetection, AutoImageProcessor
 from transformers.image_transforms import to_pil_image
 
 from data.labels_storage import exdark_idx2label
@@ -14,9 +14,9 @@ from exdark.datamodule import ExDarkDataModule
 class ExDarkRTDetrWrapper(L.LightningModule):
     def __init__(self):
         super(ExDarkRTDetrWrapper, self).__init__()
-        self.model = RTDetrForObjectDetection.from_pretrained("PekingU/rtdetr_r50vd")
-        self.image_processor = RTDetrImageProcessor.from_pretrained(
-            "PekingU/rtdetr_r50vd", do_rescale=False
+        self.model = AutoModelForObjectDetection.from_pretrained("jozhang97/deta-swin-large")
+        self.image_processor = AutoImageProcessor.from_pretrained(
+            "jozhang97/deta-swin-large", do_rescale=False
         )
         self.categories_map = self._get_transformers_coco_to_exdark_mapping()
 
@@ -31,9 +31,9 @@ class ExDarkRTDetrWrapper(L.LightningModule):
             "chair",
             "cup",
             "dog",
-            "motorbike",
+            "motorcycle",
             "person",
-            "diningtable",
+            "dining table",
         ]
         coco_categories = list(self.model.config.id2label.values())
         return {

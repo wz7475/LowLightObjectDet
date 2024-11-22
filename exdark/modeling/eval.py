@@ -59,7 +59,7 @@ if __name__ == '__main__':
     model = model.to(device)
 
     with SummaryWriter("ExDarkASCOCOWrapper_evaluation") as writer:
-        metric_summary = test_model(model, DEVICE, 8, writer)
+        metric_summary = test_model(model, DEVICE, 4, writer)
     print(f"mAP_50: {metric_summary['map_50'] * 100:.3f}")
     print(f"mAP_50_95: {metric_summary['map'] * 100:.3f}")
     print(metric_summary)
