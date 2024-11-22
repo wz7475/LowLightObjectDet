@@ -1,10 +1,12 @@
 import glob as glob
 import os
+from typing import Literal
 
 import cv2
 import numpy as np
 import torch
 from torch.utils.data import Dataset
+import albumentations as A
 
 from exdark.config import (
     RESIZE_TO, TEST_DIR
@@ -13,7 +15,7 @@ from exdark.visulisation.bbox import draw_bbox_from_targets
 
 
 class ExDarkDataset(Dataset):
-    def __init__(self, dir_path, width, height, transforms=None):
+    def __init__(self, dir_path, width, height, transforms: A.Compose=None):
         self.transforms = transforms
         self.dir_path = dir_path
         self.height = height
@@ -27,6 +29,18 @@ class ExDarkDataset(Dataset):
         self.all_images = [image_path.split(os.path.sep)[-1] for image_path in self.all_image_paths]
         self.all_images = sorted(self.all_images)
 
+    def _get_bbox(self, raw_bbox: list[float], img_width: float, img_height: float) -> list[float]:
+        l = raw_bbox[0]
+        t = raw_bbox[1]
+        a = raw_bbox[2]
+        b = raw_bbox[3]
+        return [
+            max((l / img_width) * self.width, 0),
+            max((t/ img_height) * self.height, 0),
+            min(((l+a) / img_width) * self.width, self.width),
+            min(((t+b) / img_height) * self.height, self.height)
+        ]
+
     def _get_target(self, image: np.array, annot_file_path: str, idx: int):
         boxes = []
         labels = []
@@ -35,37 +49,10 @@ class ExDarkDataset(Dataset):
 
         # read bboxes coordinates in coco style and convert them to pascal voc style
         with open(annot_file_path, 'r') as file:
-            lines = file.readlines()
-            lines = [line.strip() for line in lines]
-            for line in lines:
-                object_info = line.split(",")
+            for line in file.readlines():
+                object_info = line.strip().split(",")
                 labels.append(int(object_info[0]))
-
-                l = float(object_info[1])
-                t = float(object_info[2])
-                w = float(object_info[3])
-                h = float(object_info[4])
-                xmin = l
-                ymin = t
-                xmax = l + w
-                ymax = t + h
-
-                xmin_final = (xmin / image_width) * self.width
-                xmax_final = (xmax / image_width) * self.width
-                ymin_final = (ymin / image_height) * self.height
-                ymax_final = (ymax / image_height) * self.height
-
-                # Check that all coordinates are within the image.
-                if xmax_final > self.width:
-                    xmax_final = self.width
-                if ymax_final > self.height:
-                    ymax_final = self.height
-                if xmin_final < 0:
-                    xmin_final = 0
-                if ymin_final < 0:
-                    ymax_final = 0
-
-                boxes.append([xmin_final, ymin_final, xmax_final, ymax_final])
+                boxes.append(self._get_bbox([float(x) for x in object_info[1:5]], image_width, image_height))
         boxes = torch.as_tensor(boxes, dtype=torch.float32)
         area = (boxes[:, 3] - boxes[:, 1]) * (boxes[:, 2] - boxes[:, 0]) if len(boxes) > 0 \
             else torch.as_tensor(boxes, dtype=torch.float32)
@@ -82,6 +69,12 @@ class ExDarkDataset(Dataset):
         return target
 
     def __getitem__(self, idx):
+        """
+        return tuple
+        - image: ndarrray of shape (640, 640, 3)
+        - target: dict like {'area': tensor([121421.4609,  96218.9453]), 'boxes': tensor([[132.0000, 202.1053, 451.0000, 582.7368],
+        [314.0000, 232.4211, 604.0000, 564.2105]]), 'image_id': tensor([0]), 'iscrowd': tensor([0, 0]), 'labels': tensor([1, 1]), 'size': tensor([640, 640])}
+        """
         # Capture the image name and the full image path.
         image_name = self.all_images[idx]
         image_name = image_name
