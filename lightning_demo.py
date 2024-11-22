@@ -4,14 +4,14 @@ from lightning import Trainer
 
 from exdark.config import TEST_DIR
 from exdark.datamodule import ExDarkDataModule
-from exdark.models.cocowraper import ExDarkAsCOCOWrapper
+from exdark.models.cocowrapperfasterrcnn import ExDarkFasterRCNNWrapper
 
 if __name__ == "__main__":
     # model loading
     core_model = torchvision.models.detection.fasterrcnn_resnet50_fpn(
         weights=torchvision.models.detection.FasterRCNN_ResNet50_FPN_Weights.DEFAULT
     )
-    wrapped_model = ExDarkAsCOCOWrapper(core_model)
+    wrapped_model = ExDarkFasterRCNNWrapper(core_model)
     wrapped_model.eval()
     print(wrapped_model.device)
 

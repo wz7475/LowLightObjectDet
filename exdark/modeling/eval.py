@@ -1,14 +1,13 @@
 import torch
 import torchvision
 from torch import nn
+from torch.utils.tensorboard import SummaryWriter
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
 from tqdm import tqdm
-from torch.utils.tensorboard import SummaryWriter
 
-from exdark.config import DEVICE, BATCH_SIZE
+from exdark.config import DEVICE
 from exdark.datamodule import ExDarkDataModule
-from exdark.models.coremodels import create_sdd300_vgg16_model
-from exdark.models.cocowraper import ExDarkAsCOCOWrapper
+from exdark.models.cocowrapperfasterrcnn import ExDarkFasterRCNNWrapper
 
 
 def test_model(model: nn.Module, device: torch.device, batch_size: int, writer: SummaryWriter):
@@ -51,11 +50,11 @@ def test_model(model: nn.Module, device: torch.device, batch_size: int, writer: 
 if __name__ == '__main__':
     core_model = torchvision.models.detection.fasterrcnn_resnet50_fpn_v2(
         weights=torchvision.models.detection.FasterRCNN_ResNet50_FPN_V2_Weights.DEFAULT)
-    model = ExDarkAsCOCOWrapper(core_model)
+    model = ExDarkFasterRCNNWrapper(core_model)
     model = model.to(DEVICE)
 
-    with SummaryWriter("ExDarkASCOCOWrapper evaluation") as writer:
-        metric_summary = test_model(model, DEVICE, BATCH_SIZE, writer)
+    with SummaryWriter("ExDarkASCOCOWrapper_evaluation") as writer:
+        metric_summary = test_model(model, DEVICE, 16, writer)
     print(f"mAP_50: {metric_summary['map_50'] * 100:.3f}")
     print(f"mAP_50_95: {metric_summary['map'] * 100:.3f}")
     print(metric_summary)

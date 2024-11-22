@@ -1,14 +1,18 @@
 import os
 import urllib.request
 from typing import Optional, Any
+
+from PIL import ImageDraw
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
 import torch
 import torchvision
 from lightning.pytorch.utilities.types import STEP_OUTPUT
 from torch import nn, Tensor
 import lightning as L
+from transformers.image_transforms import to_pil_image
 
-from data.labels_storage import coco2coco_like_exdark
+from data.labels_storage import coco2coco_like_exdark, exdark_coco_like_labels
+from exdark.datamodule import ExDarkDataModule
 
 
 class ExDarkFasterRCNNWrapper(L.LightningModule):
@@ -47,20 +51,34 @@ class ExDarkFasterRCNNWrapper(L.LightningModule):
 
 
 if __name__ == "__main__":
-    img_name = "temp.jpg"
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(device)
-    urllib.request.urlretrieve("http://farm6.staticflickr.com/5341/9632894369_e180ee5731_z.jpg", img_name)
-    img = torchvision.io.read_image(img_name).float()
-    core_model = torchvision.models.detection.fasterrcnn_resnet50_fpn(
+    wrapped_model = ExDarkFasterRCNNWrapper(torchvision.models.detection.fasterrcnn_resnet50_fpn(
         weights=torchvision.models.detection.FasterRCNN_ResNet50_FPN_Weights
-    )
-    wrapped_model = ExDarkFasterRCNNWrapper(core_model)
-    wrapped_model.eval()
+    )).to(device).eval()
+    data_iter = iter(ExDarkDataModule(batch_size=1).val_dataloader())
 
-    with torch.no_grad():
-        result = wrapped_model([img, img])
+    for _ in range(3):
+        imgs, targets = next(data_iter)
+        img_pil = to_pil_image(imgs[0])
+        imgs = [img.to(device) for img in imgs]
 
-    print(result)
+        with torch.no_grad():
+            results = wrapped_model(imgs)
 
-    os.remove(img_name)
+        print(results)
+        """
+        [{'boxes': tensor([[228.7298,  70.7155, 391.9681, 219.7094],
+        [134.9557,  25.8951, 385.8469, 222.0154],
+        [244.1486,   3.4234, 389.3126, 199.0562],
+        [289.7344, 110.3468, 387.8669, 216.8933],
+        [227.2883,  18.5220, 396.0899, 231.3304]]), 'labels': tensor([ 1,  1, 11,  1, 10]), 'scores': tensor([0.9260, 0.4006, 0.1689, 0.1378, 0.0742])}]
+        """
+        draw = ImageDraw.Draw(img_pil)
+        result = results[0]
+        for score, label, box in zip(result["scores"], result["labels"], result["boxes"]):
+            if score > 0.4:
+                x, y, x2, y2 = tuple(box)
+                draw.rectangle((x, y, x2, y2), outline="red", width=2)
+                draw.text((x, y), exdark_coco_like_labels[label.item()], fill="white")
+        img_pil.show()
