@@ -5,11 +5,14 @@ from typing import Optional
 import PIL.Image
 import lightning as L
 import torch
+import torchvision.io
 from PIL import ImageDraw
 from torch import Tensor
 from transformers import RTDetrForObjectDetection, RTDetrImageProcessor
+from transformers.image_transforms import to_pil_image
 
 from data.labels_storage import coco2coco_like_exdark
+from exdark.datamodule import ExDarkDataModule
 
 
 class ExDarkRTDetrWrapper(L.LightningModule):
@@ -17,7 +20,7 @@ class ExDarkRTDetrWrapper(L.LightningModule):
         super(ExDarkRTDetrWrapper, self).__init__()
         self.model = RTDetrForObjectDetection.from_pretrained("PekingU/rtdetr_r50vd")
         self.image_processor = RTDetrImageProcessor.from_pretrained(
-            "PekingU/rtdetr_r50vd"
+            "PekingU/rtdetr_r50vd", do_rescale=False
         )
         self.categories_filter = categories_filter
 
@@ -42,13 +45,17 @@ class ExDarkRTDetrWrapper(L.LightningModule):
             )
         return filtered_detections_list
 
+    def _convert_bbox_from_pacal_voc_to_coco(self, annotations):
+        pass
+
     def forward(
         self, images: list[Tensor], targets: Optional[list[dict[str, Tensor]]] = None
     ):
         input_encoding = self.image_processor(images, return_tensors="pt")
+        input_encoding = {k: v.to(self.device) for k, v in input_encoding.items()}
         output_encoding = self.model(**input_encoding)
         outputs = self.image_processor.post_process_object_detection(
-            output_encoding, target_sizes=torch.tensor([img.size[::-1] for img in images]), threshold=0.4
+            output_encoding, target_sizes=torch.tensor([img.shape[1:] for img in images]), threshold=0.4
         )
         return self._filter_detections(outputs)
 
@@ -57,26 +64,23 @@ class ExDarkRTDetrWrapper(L.LightningModule):
 
 
 if __name__ == "__main__":
-    img_name = "temp.jpg"
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    data_iter =  iter(ExDarkDataModule(batch_size=2).val_dataloader())
+    imgs, targets = next(data_iter)
+    device = torch.device("cuda" if torch.cuda.is_available() else "mps")
     print(device)
-    urllib.request.urlretrieve(
-        "http://farm6.staticflickr.com/5341/9632894369_e180ee5731_z.jpg", img_name
-    )
-    img = PIL.Image.open(img_name)
-    print(img.size)
-    wrapped_model = ExDarkRTDetrWrapper()
+
+    img_pil = to_pil_image(imgs[0])
+    wrapped_model = ExDarkRTDetrWrapper().to(device)
 
     with torch.no_grad():
-        results = wrapped_model([img, img])
+        results = wrapped_model(imgs)
 
     print(results)
-    draw = ImageDraw.Draw(img)
+    draw = ImageDraw.Draw(img_pil)
     result = results[0]
     for score, label, box in zip(result["scores"], result["labels"], result["boxes"]):
-        # box = [round(i, 2) for i in box.tolist()]
         x, y, x2, y2 = tuple(box)
         draw.rectangle((x, y, x2, y2), outline="red", width=2)
-        # draw.text((x, y), model.config.id2label[label.item()], fill="white")
-    img.show()
-    os.remove(img_name)
+
+    img_pil.show()
