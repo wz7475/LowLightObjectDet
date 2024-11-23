@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.2"
-content_hash = "sha256:10fda98ac7590c831e10495d5d98d01aa38cd954db4426d18c75970ba19d2359"
+content_hash = "sha256:be3898209feec589889721b5180097177b121a4cc769dc3766c49baf9d59da01"
 
 [[package]]
 name = "absl-py"
@@ -3426,6 +3426,24 @@ dependencies = [
 files = [
     {file = "tifffile-2024.8.30-py3-none-any.whl", hash = "sha256:8bc59a8f02a2665cd50a910ec64961c5373bee0b8850ec89d3b7b485bf7be7ad"},
     {file = "tifffile-2024.8.30.tar.gz", hash = "sha256:2c9508fe768962e30f87def61819183fb07692c258cb175b3c114828368485a4"},
+]
+
+[[package]]
+name = "timm"
+version = "1.0.11"
+requires_python = ">=3.8"
+summary = "PyTorch Image Models"
+groups = ["default"]
+dependencies = [
+    "huggingface-hub",
+    "pyyaml",
+    "safetensors",
+    "torch",
+    "torchvision",
+]
+files = [
+    {file = "timm-1.0.11-py3-none-any.whl", hash = "sha256:52a6f895e2cbec35a87d0846870419c2c0aa40de9b205bcda917f38278bf3044"},
+    {file = "timm-1.0.11.tar.gz", hash = "sha256:a005f72b87e67ed30cdbf405a9ffd4e723360c780a43b1cefe266af8ecc9d151"},
 ]
 
 [[package]]

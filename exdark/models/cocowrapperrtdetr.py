@@ -4,7 +4,10 @@ import lightning as L
 import torch
 from PIL import ImageDraw
 from torch import Tensor
-from transformers import RTDetrForObjectDetection, RTDetrImageProcessor
+from transformers import (
+    AutoImageProcessor,
+    AutoModelForObjectDetection,
+)
 from transformers.image_transforms import to_pil_image
 
 from data.labels_storage import exdark_idx2label
@@ -14,9 +17,9 @@ from exdark.datamodule import ExDarkDataModule
 class ExDarkRTDetrWrapper(L.LightningModule):
     def __init__(self):
         super(ExDarkRTDetrWrapper, self).__init__()
-        self.model = RTDetrForObjectDetection.from_pretrained("PekingU/rtdetr_r50vd")
-        self.image_processor = RTDetrImageProcessor.from_pretrained(
-            "PekingU/rtdetr_r50vd", do_rescale=False
+        self.model = AutoModelForObjectDetection.from_pretrained("SenseTime/deformable-detr")
+        self.image_processor = AutoImageProcessor.from_pretrained(
+            "SenseTime/deformable-detr", do_rescale=False
         )
         self.categories_map = self._get_transformers_coco_to_exdark_mapping()
 
@@ -31,9 +34,9 @@ class ExDarkRTDetrWrapper(L.LightningModule):
             "chair",
             "cup",
             "dog",
-            "motorbike",
+            "motorcycle",
             "person",
-            "diningtable",
+            "dining table",
         ]
         coco_categories = list(self.model.config.id2label.values())
         return {
@@ -81,7 +84,7 @@ if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "mps")
     print(device)
     wrapped_model = ExDarkRTDetrWrapper().to(device)
-    data_iter = iter(ExDarkDataModule(batch_size=1).val_dataloader())
+    data_iter = iter(ExDarkDataModule(batch_size=2).val_dataloader())
 
     for _ in range(3):
         imgs, targets = next(data_iter)
