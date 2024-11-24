@@ -19,16 +19,17 @@ class Detr(L.LightningModule):
     def __init__(self, lr, lr_backbone, weight_decay):
         super(Detr, self).__init__()
         self.model = AutoModelForObjectDetection.from_pretrained(
-            "SenseTime/deformable-detr",
+            "SenseTime/deformable-detr-with-box-refine-two-stage",
             num_labels=len(exdark_idx2label), # TODO check if __background__ should be counted
             ignore_mismatched_sizes=True,
         )
         self.image_processor = AutoImageProcessor.from_pretrained(
-            "SenseTime/deformable-detr", do_rescale=False
+            "SenseTime/deformable-detr-with-box-refine-two-stage", do_rescale=False
         )
         self.lr = lr
         self.lr_backbone = lr_backbone
         self.weight_decay = weight_decay
+        self.save_hyperparameters()
         self.metric = MeanAveragePrecision()
 
     @staticmethod
@@ -133,7 +134,8 @@ class Detr(L.LightningModule):
             },
         ]
         optimizer = torch.optim.AdamW(param_dicts, lr=self.lr, weight_decay=self.weight_decay)
-        return optimizer
+        lr_scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.95)
+        return [optimizer], [lr_scheduler]
 
 
 if __name__ == "__main__":
@@ -148,7 +150,7 @@ if __name__ == "__main__":
     checkpoints = ModelCheckpoint(
         save_top_k=1,
         mode="max",
-        monitor="val_loss",
+        monitor="val_mAP",
         save_last=True,
         every_n_epochs=1,
     )
@@ -158,6 +160,8 @@ if __name__ == "__main__":
     wandb.login(key=os.environ["WANDB_TOKEN"])
     wandb_logger = WandbLogger(project="exdark")
     wandb_logger.experiment.config["batch_size"] = batch_size
+    wandb_logger.experiment.config["datamodule"] = "ExDarkDataModule"
+    wandb_logger.experiment.config["modele"] = "SenseTime/deformable-detr-with-box-refine-two-stage"
     lr_monitor = LearningRateMonitor(logging_interval="step", log_momentum=True)
 
     # training
