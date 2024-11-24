@@ -27,6 +27,7 @@ class ExDarkDataModule(L.LightningDataModule):
         )
         self.val_dataset = ExDarkDataset(
             VALID_DIR, RESIZE_TO, RESIZE_TO, self.eval_transforms
+            # "data/dataset/split/tiny", RESIZE_TO, RESIZE_TO, self.eval_transforms
         )
         self.test_dataset = ExDarkDataset(
             TEST_DIR, RESIZE_TO, RESIZE_TO, self.eval_transforms
@@ -35,10 +36,10 @@ class ExDarkDataModule(L.LightningDataModule):
     @staticmethod
     def get_train_transformations() -> A.Compose:
         return A.Compose([
-            # A.Perspective(p=0.1),
-            # A.HorizontalFlip(p=0.5),
-            # A.RandomBrightnessContrast(p=0.5),
-            # A.HueSaturationValue(p=0.1),
+            A.Perspective(p=0.1),
+            A.HorizontalFlip(p=0.5),
+            A.RandomBrightnessContrast(p=0.5),
+            A.HueSaturationValue(p=0.1),
             ToTensorV2(),
         ], bbox_params=A.BboxParams(format='pascal_voc', label_fields=['labels']))
 
