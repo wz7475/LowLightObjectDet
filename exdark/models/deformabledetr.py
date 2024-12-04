@@ -140,7 +140,7 @@ class Detr(L.LightningModule):
 
 if __name__ == "__main__":
     # data
-    batch_size = 4
+    batch_size = 6
     exdark_data = ExDarkDataModule(batch_size)
 
     # model
@@ -162,6 +162,7 @@ if __name__ == "__main__":
     wandb_logger.experiment.config["batch_size"] = batch_size
     wandb_logger.experiment.config["datamodule"] = "ExDarkDataModule"
     wandb_logger.experiment.config["modele"] = "SenseTime/deformable-detr-with-box-refine-two-stage"
+    wandb_logger.experiment.config["augmentations"] = "None"
     lr_monitor = LearningRateMonitor(logging_interval="step", log_momentum=True)
 
     # training
