@@ -16,6 +16,7 @@ from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor
 from lightning.pytorch.loggers import WandbLogger
 from lightning.pytorch.utilities.types import STEP_OUTPUT
 from torch import Tensor
+from torch.optim.lr_scheduler import MultiStepLR
 from torchmetrics.detection import MeanAveragePrecision
 
 from data.labels_storage import exdark_coco_like_labels
@@ -43,14 +44,6 @@ class FasterRCNN(L.LightningModule):
     def forward(
             self, images: list[Tensor], targets: Optional[list[dict[str, Tensor]]] = None
     ):
-        if targets:
-            for target in targets:
-                try:
-                    assert target["boxes"].size(0) == target["labels"].size(0), "Mismatched boxes and labels"
-                except AssertionError:
-                    print(f"boxes: {target['boxes'].size(0)}")
-                    print(f"labels: {target['labels'].size(0)}")
-                    raise AssertionError()
         return self.model(images, targets)
 
     def predict_step(self, batch, batch_idx, dataloader_idx=0):
@@ -97,7 +90,7 @@ class FasterRCNN(L.LightningModule):
         })
         params = [param for param in self.model.parameters() if param.requires_grad]
         optimizer = torch.optim.SGD(params, momentum=0.9, weight_decay=self.weight_decay)
-        lr_scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.99)
+        lr_scheduler = MultiStepLR(optimizer, milestones=[15,30], gamma=0.1)
         return [optimizer], [lr_scheduler]
 
 
@@ -112,19 +105,26 @@ if __name__ == "__main__":
         save_top_k=1,
         mode="max",
         monitor="val_mAP",
-        save_last=True,
         every_n_epochs=1,
     )
     lr_monitor = LearningRateMonitor(logging_interval='step', log_momentum=True)
     load_dotenv()
     wandb.login(key=os.environ["WANDB_TOKEN"])
     wandb_logger = WandbLogger(project='exdark')
+    wandb_logger.experiment.config["batch_size"] = batch_size
+    wandb_logger.experiment.config["datamodule"] = "ExDarkDataModule"
+    wandb_logger.experiment.config["model"] = "fasterrcnn_resnet50_fpn_v2"
+    wandb_logger.experiment.config["augmentations"] = """A.RandomGamma(gamma_limit=(80, 120), p=1.0),
+            A.Perspective(p=0.1),
+            A.HorizontalFlip(p=0.5),
+            A.RandomBrightnessContrast(p=0.5),
+            A.HueSaturationValue(p=0.1),"""
     # TODO: add datamodule specs logging
     wandb_logger.experiment.config["batch_size"] = batch_size
     model = FasterRCNN()
     trainer = L.Trainer(
         accelerator="gpu",
-        max_epochs=80,
+        max_epochs=150,
         callbacks=[checkpoints, lr_monitor],
         logger=wandb_logger
     )
