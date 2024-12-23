@@ -1,3 +1,5 @@
+import os.path
+
 import torch
 import torchvision
 from torch import nn
@@ -6,16 +8,19 @@ from torchmetrics.detection.mean_ap import MeanAveragePrecision
 from tqdm import tqdm
 
 from exdark.config import DEVICE
-from exdark.datamodule import ExDarkDataModule
+from exdark.datamodule import ExDarkDataModule, BrightenExDarkDataModule, GammaBrightenExDarkDataModule, \
+    GaussNoiseExDarkDataModule
 from exdark.models.cocowrapperfasterrcnn import ExDarkFasterRCNNWrapper
 from exdark.models.cocowrapperrtdetr import ExDarkRTDetrWrapper
+from exdark.models.fasterrcnn import FasterRCNN
 
 
 def test_model(model: nn.Module, device: torch.device, batch_size: int, writer: SummaryWriter):
     """
     function to evaluate model independently of its architecture and way of training
     """
-    test_loader = ExDarkDataModule(batch_size=batch_size).test_dataloader()
+    test_loader = GaussNoiseExDarkDataModule(batch_size=batch_size).test_dataloader()
+    # test_loader = ExDarkDataModule(batch_size=batch_size).test_dataloader()
     model.eval()
     prog_bar = tqdm(test_loader, total=len(test_loader))
     all_targets = []
@@ -51,15 +56,18 @@ def test_model(model: nn.Module, device: torch.device, batch_size: int, writer: 
 if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() else "mps")
     print(device)
-    # core_model = torchvision.models.detection.fasterrcnn_resnet50_fpn_v2(
-    #     weights=torchvision.models.detection.FasterRCNN_ResNet50_FPN_V2_Weights.DEFAULT)
-    # model = ExDarkFasterRCNNWrapper(core_model)
-    model = ExDarkRTDetrWrapper()
+    core_model = torchvision.models.detection.fasterrcnn_resnet50_fpn_v2(
+        weights=torchvision.models.detection.FasterRCNN_ResNet50_FPN_V2_Weights.DEFAULT)
+    model = ExDarkFasterRCNNWrapper(core_model)
+    # model = ExDarkRTDetrWrapper()
+    # model = FasterRCNN.load_from_checkpoint("exdark/5b16v4xi/checkpoints/epoch=142-step=26741.ckpt")
     print(model.__class__)
     model = model.to(device)
 
-    with SummaryWriter("ExDarkASCOCOWrapper_evaluation") as writer:
-        metric_summary = test_model(model, DEVICE, 8, writer)
+    base_dir = os.path.join("eval_runs", "base")
+    os.makedirs(base_dir, exist_ok=True)
+    with SummaryWriter(log_dir=os.path.join(base_dir, "faster_rcnn_v1")) as writer:
+        metric_summary = test_model(model, device, 16, writer)
     print(f"mAP_50: {metric_summary['map_50'] * 100:.3f}")
     print(f"mAP_50_95: {metric_summary['map'] * 100:.3f}")
     print(metric_summary)

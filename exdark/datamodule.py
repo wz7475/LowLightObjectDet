@@ -40,6 +40,10 @@ class ExDarkDataModule(L.LightningDataModule):
             A.HorizontalFlip(p=0.5),
             A.RandomBrightnessContrast(p=0.5),
             A.HueSaturationValue(p=0.1),
+            A.Rotate(limit=30, p=0.3),
+            A.GaussNoise(var_limit=(10.0, 50.0), p=0.3),
+            A.GaussianBlur(blur_limit=3, p=0.2),
+            A.RandomShadow(p=0.3),
             ToTensorV2(),
         ], bbox_params=A.BboxParams(format='pascal_voc', label_fields=['labels']))
 
@@ -81,14 +85,14 @@ class BrightenExDarkDataModule(ExDarkDataModule):
     def __init__(self, batch_size: int):
         super().__init__(batch_size)
         self.train_dataset = ExDarkDataset(
-            TRAIN_DIR, RESIZE_TO, RESIZE_TO, self.train_transforms
+            TRAIN_DIR_LIGHTEN, RESIZE_TO, RESIZE_TO, self.train_transforms
             # "data/dataset/split/tiny", RESIZE_TO, RESIZE_TO, self.train_transforms
         )
         self.val_dataset = ExDarkDataset(
-            VALID_DIR, RESIZE_TO, RESIZE_TO, self.eval_transforms
+            VALID_DIR_LIGHTEN, RESIZE_TO, RESIZE_TO, self.eval_transforms
         )
         self.test_dataset = ExDarkDataset(
-            TEST_DIR, RESIZE_TO, RESIZE_TO, self.eval_transforms
+            TEST_DIR_LIGHTEN, RESIZE_TO, RESIZE_TO, self.eval_transforms
         )
 
 
@@ -99,7 +103,7 @@ class GammaBrightenExDarkDataModule(ExDarkDataModule):
     @staticmethod
     def get_train_transformations() -> A.Compose:
         return A.Compose([
-            A.RandomGamma(gamma_limit=(80, 120), p=1.0),
+            A.RandomGamma(gamma_limit=(40, 60), p=1.0),
             A.Perspective(p=0.1),
             A.HorizontalFlip(p=0.5),
             A.RandomBrightnessContrast(p=0.5),
@@ -110,7 +114,32 @@ class GammaBrightenExDarkDataModule(ExDarkDataModule):
     @staticmethod
     def get_eval_transformations() -> A.Compose:
         return A.Compose([
-            A.RandomGamma(gamma_limit=(80, 120), p=1.0),
+            A.RandomGamma(gamma_limit=(40, 60), p=1.0),
+            ToTensorV2(p=1.0)
+        ],
+            bbox_params={
+                'format': 'pascal_voc',
+                'label_fields': ['labels']
+            })
+
+class GaussNoiseExDarkDataModule(ExDarkDataModule):
+    def __init__(self, batch_size: int):
+        super().__init__(batch_size)
+
+    @staticmethod
+    def get_train_transformations() -> A.Compose:
+        return A.Compose([
+            A.Perspective(p=0.1),
+            A.HorizontalFlip(p=0.5),
+            A.RandomBrightnessContrast(p=0.5),
+            A.GaussNoise(var_limit=(7500, 8000)),
+            ToTensorV2(),
+        ], bbox_params=A.BboxParams(format='pascal_voc', label_fields=['labels']))
+
+    @staticmethod
+    def get_eval_transformations() -> A.Compose:
+        return A.Compose([
+            A.GaussNoise(var_limit=(7500, 8000)),
             ToTensorV2(p=1.0)
         ],
             bbox_params={

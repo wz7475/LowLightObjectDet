@@ -20,7 +20,8 @@ from torch.optim.lr_scheduler import MultiStepLR
 from torchmetrics.detection import MeanAveragePrecision
 
 from data.labels_storage import exdark_coco_like_labels
-from exdark.datamodule import ExDarkDataModule
+from exdark.datamodule import ExDarkDataModule, BrightenExDarkDataModule, GammaBrightenExDarkDataModule, \
+    GaussNoiseExDarkDataModule
 
 
 class FasterRCNN(L.LightningModule):
@@ -99,7 +100,7 @@ if __name__ == "__main__":
     load_dotenv()
     os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:512"
     batch_size = 16
-    exdark_data = ExDarkDataModule(batch_size=batch_size)
+    exdark_data = GaussNoiseExDarkDataModule(batch_size=batch_size)
     # checkpoints
     checkpoints = ModelCheckpoint(
         save_top_k=1,
@@ -112,15 +113,16 @@ if __name__ == "__main__":
     wandb.login(key=os.environ["WANDB_TOKEN"])
     wandb_logger = WandbLogger(project='exdark')
     wandb_logger.experiment.config["batch_size"] = batch_size
-    wandb_logger.experiment.config["datamodule"] = "ExDarkDataModule"
+    wandb_logger.experiment.config["datamodule"] = "GaussNoiseExDarkDataModule"
     wandb_logger.experiment.config["model"] = "fasterrcnn_resnet50_fpn_v2"
-    wandb_logger.experiment.config["augmentations"] = """A.RandomGamma(gamma_limit=(80, 120), p=1.0),
-            A.Perspective(p=0.1),
+    wandb_logger.experiment.config["augmentations"] = """A.Perspective(p=0.1),
             A.HorizontalFlip(p=0.5),
             A.RandomBrightnessContrast(p=0.5),
-            A.HueSaturationValue(p=0.1),"""
+            A.GaussNoise(var_limit=(7500, 8000)),
+    """
     # TODO: add datamodule specs logging
     wandb_logger.experiment.config["batch_size"] = batch_size
+    wandb_logger.experiment.config["lr_same_for_backbone_and_head"] = False
     model = FasterRCNN()
     trainer = L.Trainer(
         accelerator="gpu",
