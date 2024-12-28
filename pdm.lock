@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.2"
-content_hash = "sha256:be3898209feec589889721b5180097177b121a4cc769dc3766c49baf9d59da01"
+content_hash = "sha256:3064571b9f0df0d5279426b701b239314c4a3f3ecdb64b3701adb0e6952ffcde"
 
 [[package]]
 name = "absl-py"
@@ -978,6 +978,17 @@ dependencies = [
 files = [
     {file = "imageio-2.35.1-py3-none-any.whl", hash = "sha256:6eb2e5244e7a16b85c10b5c2fe0f7bf961b40fcb9f1a9fd1bd1d2c2f8fb3cd65"},
     {file = "imageio-2.35.1.tar.gz", hash = "sha256:4952dfeef3c3947957f6d5dedb1f4ca31c6e509a476891062396834048aeed2a"},
+]
+
+[[package]]
+name = "iniconfig"
+version = "2.0.0"
+requires_python = ">=3.7"
+summary = "brain-dead simple config-ini parsing"
+groups = ["dev"]
+files = [
+    {file = "iniconfig-2.0.0-py3-none-any.whl", hash = "sha256:b6a85871a79d2e3b22d2d1b94ac2824226a63c6b741c88f7ae975f18b6778374"},
+    {file = "iniconfig-2.0.0.tar.gz", hash = "sha256:2d91e135bf72d31a410b17c16da610a82cb55f6b0477d1a902134b24a455b8b3"},
 ]
 
 [[package]]
@@ -2296,6 +2307,17 @@ files = [
 ]
 
 [[package]]
+name = "pluggy"
+version = "1.5.0"
+requires_python = ">=3.8"
+summary = "plugin and hook calling mechanisms for python"
+groups = ["dev"]
+files = [
+    {file = "pluggy-1.5.0-py3-none-any.whl", hash = "sha256:44e1ad92c8ca002de6377e165f3e0f1be63266ab4d554740532335b9d75ea669"},
+    {file = "pluggy-1.5.0.tar.gz", hash = "sha256:2cffa88e94fdc978c4c574f15f9e59b7f4201d439195c3715ca9e2486f1d0cf1"},
+]
+
+[[package]]
 name = "prometheus-client"
 version = "0.21.0"
 requires_python = ">=3.8"
@@ -2515,6 +2537,25 @@ groups = ["default"]
 files = [
     {file = "pyparsing-3.1.4-py3-none-any.whl", hash = "sha256:a6a7ee4235a3f944aa1fa2249307708f893fe5717dc603503c6c7969c070fb7c"},
     {file = "pyparsing-3.1.4.tar.gz", hash = "sha256:f86ec8d1a83f11977c9a6ea7598e8c27fc5cddfa5b07ea2241edbbde1d7bc032"},
+]
+
+[[package]]
+name = "pytest"
+version = "8.3.4"
+requires_python = ">=3.8"
+summary = "pytest: simple powerful testing with Python"
+groups = ["dev"]
+dependencies = [
+    "colorama; sys_platform == \"win32\"",
+    "exceptiongroup>=1.0.0rc8; python_version < \"3.11\"",
+    "iniconfig",
+    "packaging",
+    "pluggy<2,>=1.5",
+    "tomli>=1; python_version < \"3.11\"",
+]
+files = [
+    {file = "pytest-8.3.4-py3-none-any.whl", hash = "sha256:50e16d954148559c9a74109af1eaf0c945ba2d8f30f0a3d3335edde19788b6f6"},
+    {file = "pytest-8.3.4.tar.gz", hash = "sha256:965370d062bce11e73868e0335abac31b4d3de0e82f4007408d242b4f8610761"},
 ]
 
 [[package]]
