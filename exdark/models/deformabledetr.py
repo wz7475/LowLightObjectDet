@@ -12,7 +12,7 @@ from torchmetrics.detection import MeanAveragePrecision
 from transformers import AutoModelForObjectDetection, AutoImageProcessor
 
 from data.labels_storage import exdark_idx2label
-from exdark.datamodule import ExDarkDataModule
+from exdark.data.datamodule import ExDarkDataModule
 
 
 class Detr(L.LightningModule):

@@ -5,7 +5,7 @@ from lightning.pytorch.utilities.types import EVAL_DATALOADERS, TRAIN_DATALOADER
 from torch.utils.data import DataLoader
 
 from exdark.config import RESIZE_TO, TRAIN_DIR, VALID_DIR, TEST_DIR, TRAIN_DIR_LIGHTEN, TEST_DIR_LIGHTEN, VALID_DIR_LIGHTEN
-from exdark.datasets import ExDarkDataset
+from exdark.data.datasets import ExDarkDataset
 
 
 class PredictionError(Exception):

@@ -2,7 +2,7 @@ from unittest.mock import patch
 
 import pytest
 
-from exdark.datasets import ExDarkDataset
+from exdark.data.datasets import ExDarkDataset
 
 
 @pytest.fixture

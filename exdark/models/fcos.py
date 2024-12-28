@@ -25,7 +25,7 @@ from torchvision.models.detection.anchor_utils import AnchorGenerator
 from torchvision.models.detection.fcos import FCOSClassificationHead
 
 from data.labels_storage import exdark_coco_like_labels
-from exdark.datamodule import ExDarkDataModule
+from exdark.data.datamodule import ExDarkDataModule
 
 
 class Fcos(L.LightningModule):

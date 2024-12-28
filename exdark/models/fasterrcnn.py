@@ -20,7 +20,7 @@ from torch.optim.lr_scheduler import MultiStepLR
 from torchmetrics.detection import MeanAveragePrecision
 
 from data.labels_storage import exdark_coco_like_labels
-from exdark.datamodule import ExDarkDataModule, BrightenExDarkDataModule, GammaBrightenExDarkDataModule, \
+from exdark.data.datamodule import ExDarkDataModule, BrightenExDarkDataModule, GammaBrightenExDarkDataModule, \
     GaussNoiseExDarkDataModule
 
 

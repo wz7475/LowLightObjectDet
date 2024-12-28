@@ -11,7 +11,7 @@ from transformers import (
 from transformers.image_transforms import to_pil_image
 
 from data.labels_storage import exdark_idx2label
-from exdark.datamodule import ExDarkDataModule
+from exdark.data.datamodule import ExDarkDataModule
 
 
 class ExDarkRTDetrWrapper(L.LightningModule):

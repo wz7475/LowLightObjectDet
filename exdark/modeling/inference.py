@@ -1,3 +1,10 @@
+"""
+Module to run inference on images using the trained model.
+
+Example:
+    $ python inference.py --input /path/to/image/directory/
+"""
+
 import argparse
 import glob as glob
 
@@ -8,12 +15,21 @@ import torch
 from exdark.config import (
     DEVICE
 )
-from exdark.models.coremodels import create_sdd300_vgg16_model
+from exdark.models.rawcocomodels import get_faste_rcnn_resnet50
 from exdark.models.cocowrapperfasterrcnn import ExDarkFasterRCNNWrapper
 from exdark.visulisation.bbox import draw_bbox_from_preds
 
 
-def run_inference(img_paths: list[str], model: torch.nn.Module, confidence_thr: float = 0.5):
+def run_inference(img_paths: list[str], model: torch.nn.Module):
+    """Run object detection inference on a list of images.
+    
+    Args:
+        img_paths (list[str]): List of paths to input images to process
+        model (torch.nn.Module): Trained PyTorch model for object detection
+        
+    Returns:
+        None: Results are visualized directly on images
+    """
     for i in range(len(img_paths)):
         # image reading
         image = cv2.imread(img_paths[i])
@@ -36,8 +52,8 @@ if __name__ == "__main__":
         help='path to input image directory',
     )
     args = vars(parser.parse_args())
-    core_model = create_sdd300_vgg16_model()
-    model = ExDarkFasterRCNNWrapper(core_model)
+    coco_model = get_faste_rcnn_resnet50()
+    model = ExDarkFasterRCNNWrapper(coco_model)
     model.eval()
     model = model.to(DEVICE)
     test_images = glob.glob(f"{args['input']}/*.jpg")

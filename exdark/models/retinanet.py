@@ -22,7 +22,7 @@ from torchvision.models.detection.fcos import FCOSClassificationHead
 from torchvision.models.detection.retinanet import RetinaNetClassificationHead
 
 from data.labels_storage import exdark_coco_like_labels
-from exdark.datamodule import ExDarkDataModule
+from exdark.data.datamodule import ExDarkDataModule
 
 
 class Retina(L.LightningModule):

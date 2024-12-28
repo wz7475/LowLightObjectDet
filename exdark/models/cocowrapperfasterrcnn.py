@@ -12,7 +12,7 @@ import lightning as L
 from transformers.image_transforms import to_pil_image
 
 from data.labels_storage import coco2coco_like_exdark, exdark_coco_like_labels
-from exdark.datamodule import ExDarkDataModule
+from exdark.data.datamodule import ExDarkDataModule
 
 
 class ExDarkFasterRCNNWrapper(L.LightningModule):

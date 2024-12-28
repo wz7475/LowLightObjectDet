@@ -1,6 +1,6 @@
 
-.PHONY: test
-test:
+.PHONY: tests
+tests:
 	pytest tests
 
 .PHONY: get-base-data
