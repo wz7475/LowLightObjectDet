@@ -11,9 +11,14 @@ from exdark.data.preprocess.labels_storage import coco2coco_like_exdark, exdark_
 from exdark.data.datamodules.exdarkdatamodule import ExDarkDataModule
 
 
-class ExDarkFasterRCNNWrapper(L.LightningModule):
+class COCOWrapperTorchvision(L.LightningModule):
+    """
+    COCOWrapperTorchvision wraps any Torchvison object detection model trained on COCO datasets. After standard
+    inference predictions all predictions for categories both present in COCO and ExDark are translated from
+    COCO indicates into ExDark indices.
+    """
     def __init__(self, torchvision_detector: nn.Module, categories_filter: dict = coco2coco_like_exdark):
-        super(ExDarkFasterRCNNWrapper, self).__init__()
+        super(COCOWrapperTorchvision, self).__init__()
         self.model = torchvision_detector
         self.categories_filter = categories_filter
 
@@ -49,7 +54,7 @@ class ExDarkFasterRCNNWrapper(L.LightningModule):
 if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(device)
-    wrapped_model = ExDarkFasterRCNNWrapper(torchvision.models.detection.fasterrcnn_resnet50_fpn(
+    wrapped_model = COCOWrapperTorchvision(torchvision.models.detection.fasterrcnn_resnet50_fpn(
         weights=torchvision.models.detection.FasterRCNN_ResNet50_FPN_Weights
     )).to(device).eval()
     data_iter = iter(ExDarkDataModule(batch_size=1).val_dataloader())

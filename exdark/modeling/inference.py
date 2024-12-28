@@ -16,7 +16,7 @@ from exdark.config import (
     DEVICE
 )
 from exdark.models.rawcocomodels import get_faste_rcnn_resnet50
-from exdark.models.cocowrapperfasterrcnn import ExDarkFasterRCNNWrapper
+from exdark.models.cocowrappers.cocowrappertorchvision import COCOWrapperTorchvision
 from exdark.visulisation.bbox import draw_bbox_from_preds
 
 
@@ -53,7 +53,7 @@ if __name__ == "__main__":
     )
     args = vars(parser.parse_args())
     coco_model = get_faste_rcnn_resnet50()
-    model = ExDarkFasterRCNNWrapper(coco_model)
+    model = COCOWrapperTorchvision(coco_model)
     model.eval()
     model = model.to(DEVICE)
     test_images = glob.glob(f"{args['input']}/*.jpg")

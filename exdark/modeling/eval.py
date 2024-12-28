@@ -7,14 +7,8 @@ from torch.utils.tensorboard import SummaryWriter
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
 from tqdm import tqdm
 
-from exdark.config import DEVICE
 from exdark.data.datamodules.gaussnoisedatamodule import GaussNoiseExDarkDataModule
-from exdark.data.datamodules.gammadatamodule import GammaBrightenExDarkDataModule
-from exdark.data.datamodules.hviciddatamodule import HVICIDDataModule
-from exdark.data.datamodules.exdarkdatamodule import ExDarkDataModule
-from exdark.models.cocowrapperfasterrcnn import ExDarkFasterRCNNWrapper
-from exdark.models.cocowrapperrtdetr import ExDarkRTDetrWrapper
-from exdark.models.fasterrcnn import FasterRCNN
+from exdark.models.cocowrappers.cocowrappertorchvision import COCOWrapperTorchvision
 
 
 def test_model(model: nn.Module, device: torch.device, batch_size: int, writer: SummaryWriter):
@@ -60,7 +54,7 @@ if __name__ == '__main__':
     print(device)
     core_model = torchvision.models.detection.fasterrcnn_resnet50_fpn_v2(
         weights=torchvision.models.detection.FasterRCNN_ResNet50_FPN_V2_Weights.DEFAULT)
-    model = ExDarkFasterRCNNWrapper(core_model)
+    model = COCOWrapperTorchvision(core_model)
     # model = ExDarkRTDetrWrapper()
     # model = FasterRCNN.load_from_checkpoint("exdark/5b16v4xi/checkpoints/epoch=142-step=26741.ckpt")
     print(model.__class__)

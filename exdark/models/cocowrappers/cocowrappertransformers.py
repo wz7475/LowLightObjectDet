@@ -14,13 +14,23 @@ from exdark.data.preprocess.labels_storage import exdark_idx2label
 from exdark.data.datamodules.exdarkdatamodule import ExDarkDataModule
 
 
-class ExDarkRTDetrWrapper(L.LightningModule):
-    def __init__(self):
-        super(ExDarkRTDetrWrapper, self).__init__()
-        self.model = AutoModelForObjectDetection.from_pretrained("SenseTime/deformable-detr")
+class COCOWrapperTransformers(L.LightningModule):
+    """
+    COCOWrapperTransformers wraps any Transformers object detection model trained on COCO datasets. After standard
+    inference predictions all predictions for categories both present in COCO and ExDark are translated from
+    COCO indicates into ExDark indices.
+    """
+    def __init__(
+        self,
+        transformers_detector_tag: str = "SenseTime/deformable-detr",
+        post_processing_confidence_thr: float = 0.3,
+    ):
+        super(COCOWrapperTransformers, self).__init__()
+        self.model = AutoModelForObjectDetection.from_pretrained(transformers_detector_tag)
         self.image_processor = AutoImageProcessor.from_pretrained(
-            "SenseTime/deformable-detr", do_rescale=False
+            transformers_detector_tag, do_rescale=False
         )
+        self.post_processing_confidence_thr = post_processing_confidence_thr
         self.categories_map = self._get_transformers_coco_to_exdark_mapping()
 
     def _get_transformers_coco_to_exdark_mapping(self):
@@ -72,7 +82,7 @@ class ExDarkRTDetrWrapper(L.LightningModule):
         outputs = self.image_processor.post_process_object_detection(
             output_encoding,
             target_sizes=torch.tensor([img.shape[1:] for img in images]),
-            threshold=0.4,
+            threshold=self.post_processing_confidence_thr,
         )
         return self._filter_detections(outputs)
 
@@ -83,7 +93,7 @@ class ExDarkRTDetrWrapper(L.LightningModule):
 if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "mps")
     print(device)
-    wrapped_model = ExDarkRTDetrWrapper().to(device)
+    wrapped_model = COCOWrapperTransformers().to(device)
     data_iter = iter(ExDarkDataModule(batch_size=2).val_dataloader())
 
     for _ in range(3):
