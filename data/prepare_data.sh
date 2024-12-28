@@ -2,7 +2,7 @@
 
 images_url="https://drive.usercontent.google.com/download?id=1BHmPgu8EsHoFDDkMGLVoXIlCth2dW6Yx&export=download&authuser=0&confirm=t&uuid=3232338f-26c7-4599-9f35-f5c93b8241e4&at=AO7h07dJS6_aNoNQUhl1VrZ_c3gt:1726826664489"
 
-cd "./data" || exit ;
+
 
 wget $images_url -O "ExDark.zip" ;
 unzip "ExDark.zip" ;
