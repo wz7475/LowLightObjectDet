@@ -1,5 +1,13 @@
+"""
+Dataset module for loading and preprocessing images from the ExDark dataset.
+
+This module provides dataset classes for working with the Exclusively Dark (ExDark) 
+image dataset, supporting object detection tasks in low-light conditions.
+"""
+
 import glob as glob
 import os
+import random
 from typing import Literal
 
 import cv2
@@ -15,7 +23,19 @@ from exdark.visulisation.bbox import draw_bbox_from_targets
 
 
 class ExDarkDataset(Dataset):
-    def __init__(self, dir_path, width, height, transforms: A.Compose=None):
+    """
+    This dataset class handles loading image data and corresponding bounding box
+    annotations from the ExDark dataset directory structure.
+
+    Args:
+        dir_path (str): Root directory path containing the dataset images
+        width (int): Target width to resize images to
+        height (int): Target height to resize images to
+        transforms (A.Compose, optional): Albumentations composition of transforms
+        limit_to_n_samples (int, optional): Limit dataset to first n samples.
+            Defaults to None (use full dataset)
+    """
+    def __init__(self, dir_path, width, height, transforms: A.Compose=None, limit_to_n_samples: int | None = None):
         self.transforms = transforms
         self.dir_path = dir_path
         self.height = height
@@ -27,7 +47,10 @@ class ExDarkDataset(Dataset):
         for file_type in self.image_file_types:
             self.all_image_paths.extend(glob.glob(os.path.join(self.dir_path, file_type)))
         self.all_images = [image_path.split(os.path.sep)[-1] for image_path in self.all_image_paths]
-        self.all_images = sorted(self.all_images)
+        if limit_to_n_samples:
+            self.all_images = random.sample(self.all_images, limit_to_n_samples)
+        else:
+            self.all_images = sorted(self.all_images)
 
     def _get_bbox(self, raw_bbox: list[float], img_width: float, img_height: float) -> list[float]:
         l = raw_bbox[0]
