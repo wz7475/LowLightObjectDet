@@ -1,5 +1,6 @@
 /data/
 /data.backup
+/data-download
 !*/data/
 inference_outputs
 outputs

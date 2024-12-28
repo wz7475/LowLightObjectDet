@@ -8,8 +8,10 @@ from torchmetrics.detection.mean_ap import MeanAveragePrecision
 from tqdm import tqdm
 
 from exdark.config import DEVICE
-from exdark.data.datamodule import ExDarkDataModule, BrightenExDarkDataModule, GammaBrightenExDarkDataModule, \
-    GaussNoiseExDarkDataModule
+from exdark.data.datamodules.gaussnoisedatamodule import GaussNoiseExDarkDataModule
+from exdark.data.datamodules.gammadatamodule import GammaBrightenExDarkDataModule
+from exdark.data.datamodules.hviciddatamodule import HVICIDDataModule
+from exdark.data.datamodules.exdarkdatamodule import ExDarkDataModule
 from exdark.models.cocowrapperfasterrcnn import ExDarkFasterRCNNWrapper
 from exdark.models.cocowrapperrtdetr import ExDarkRTDetrWrapper
 from exdark.models.fasterrcnn import FasterRCNN

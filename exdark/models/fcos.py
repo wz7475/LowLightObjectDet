@@ -21,7 +21,7 @@ from torchmetrics.detection import MeanAveragePrecision
 from torchvision.models.detection.fcos import FCOSClassificationHead
 
 from exdark.data.preprocess.labels_storage import exdark_coco_like_labels
-from exdark.data.datamodule import ExDarkDataModule
+from exdark.data.datamodules.exdarkdatamodule import ExDarkDataModule
 
 
 class Fcos(L.LightningModule):

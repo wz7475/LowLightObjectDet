@@ -19,7 +19,7 @@ from torchvision.models.detection import RetinaNet_ResNet50_FPN_V2_Weights
 from torchvision.models.detection.retinanet import RetinaNetClassificationHead
 
 from exdark.data.preprocess.labels_storage import exdark_coco_like_labels
-from exdark.data.datamodule import ExDarkDataModule
+from exdark.data.datamodules.exdarkdatamodule import ExDarkDataModule
 
 
 class Retina(L.LightningModule):
