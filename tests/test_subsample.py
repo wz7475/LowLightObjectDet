@@ -4,7 +4,7 @@ import tempfile
 
 import pytest
 
-from data.subsample import create_subset_dir, NonEnoughImagesError
+from exdark.data.preprocess.subsample import create_subset_dir, NonEnoughImagesError
 
 
 @pytest.fixture

@@ -1,4 +1,5 @@
 /data/
+/data.backup
 !*/data/
 inference_outputs
 outputs

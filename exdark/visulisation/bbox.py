@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 from exdark.config import CLASSES_COCO, NUM_CLASSES_EXDARK
-from data.labels_storage import exdark_idx2label, exdark_coco_like_labels
+from exdark.data.preprocess.labels_storage import exdark_idx2label, exdark_coco_like_labels
 
 COLORS = [[0, 0, 0], [0, 0, 255]]
 COLORS.append([255, 255, 0])

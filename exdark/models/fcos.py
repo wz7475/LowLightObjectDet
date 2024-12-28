@@ -17,14 +17,10 @@ from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor
 from lightning.pytorch.loggers import WandbLogger
 from lightning.pytorch.utilities.types import STEP_OUTPUT
 from torch import Tensor
-from torch.optim.lr_scheduler import MultiStepLR
 from torchmetrics.detection import MeanAveragePrecision
-from torchvision.models import ResNet50_Weights, MobileNetV2, MobileNet_V2_Weights
-from torchvision.models.detection import FCOS
-from torchvision.models.detection.anchor_utils import AnchorGenerator
 from torchvision.models.detection.fcos import FCOSClassificationHead
 
-from data.labels_storage import exdark_coco_like_labels
+from exdark.data.preprocess.labels_storage import exdark_coco_like_labels
 from exdark.data.datamodule import ExDarkDataModule
 
 

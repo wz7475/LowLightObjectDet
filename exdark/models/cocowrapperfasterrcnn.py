@@ -1,17 +1,13 @@
-import os
-import urllib.request
-from typing import Optional, Any
+from typing import Optional
 
 from PIL import ImageDraw
-from torchmetrics.detection.mean_ap import MeanAveragePrecision
 import torch
 import torchvision
-from lightning.pytorch.utilities.types import STEP_OUTPUT
 from torch import nn, Tensor
 import lightning as L
 from transformers.image_transforms import to_pil_image
 
-from data.labels_storage import coco2coco_like_exdark, exdark_coco_like_labels
+from exdark.data.preprocess.labels_storage import coco2coco_like_exdark, exdark_coco_like_labels
 from exdark.data.datamodule import ExDarkDataModule
 
 
