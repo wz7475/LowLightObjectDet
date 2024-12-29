@@ -7,16 +7,21 @@ from dotenv import load_dotenv
 from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor
 from lightning.pytorch.loggers import WandbLogger
 
+from exdark.data.datamodules.exdarkdatamodule import ExDarkDataModule
 from exdark.data.datamodules.gaussnoisedatamodule import GaussNoiseExDarkDataModule
 from exdark.models.exdarkdedicatedmodels.fasterrcnn import FasterRCNN
-from exdark.models.callbacks import LogDataModuleCallback
+from exdark.models.callbacks import (
+    LogDataModuleCallback,
+    LogModelCallback,
+    LogTransformationCallback,
+)
 
 if __name__ == "__main__":
     # data
     load_dotenv()
     os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:512"
     batch_size = 16
-    exdark_data = GaussNoiseExDarkDataModule(batch_size=batch_size)
+    exdark_data = ExDarkDataModule(batch_size=batch_size)
 
     # checkpoints
     checkpoints = ModelCheckpoint(
@@ -25,22 +30,11 @@ if __name__ == "__main__":
         monitor="val_mAP",
         every_n_epochs=1,
     )
-    lr_monitor = LearningRateMonitor(logging_interval='step', log_momentum=True)
+    lr_monitor = LearningRateMonitor(logging_interval="step", log_momentum=True)
 
     # logger
     wandb.login(key=os.environ["WANDB_TOKEN"])
-    wandb_logger = WandbLogger(project='exdark')
-    wandb_logger.experiment.config["batch_size"] = batch_size
-    wandb_logger.experiment.config["datamodule"] = "GaussNoiseExDarkDataModule"
-    wandb_logger.experiment.config["model"] = "fasterrcnn_resnet50_fpn_v2"
-    wandb_logger.experiment.config["augmentations"] = """A.Perspective(p=0.1),
-            A.HorizontalFlip(p=0.5),
-            A.RandomBrightnessContrast(p=0.5),
-            A.GaussNoise(var_limit=(7500, 8000)),
-    """
-    # TODO: add datamodule specs logging
-    wandb_logger.experiment.config["batch_size"] = batch_size
-    wandb_logger.experiment.config["lr_same_for_backbone_and_head"] = False
+    wandb_logger = WandbLogger(project="exdark")
 
     # model
     # optimizer = torch.optim.SGD(params, momentum=0.9, weight_decay=self.weight_decay)
@@ -49,11 +43,24 @@ if __name__ == "__main__":
     optimizer_params = {"momentum": 0.9, "weight_decay": 0.0005}
     scheduler_class = torch.optim.lr_scheduler.MultiStepLR
     scheduler_params = {"milestones": [15, 30], "gamma": 0.1}
-    model = FasterRCNN(optimzer_class, optimizer_params, scheduler_class, scheduler_params, lr_head=0.005, lr_backbone=0.0005)
+    model = FasterRCNN(
+        optimzer_class,
+        optimizer_params,
+        scheduler_class,
+        scheduler_params,
+        lr_head=0.005,
+        lr_backbone=0.0005,
+    )
     trainer = L.Trainer(
         accelerator="gpu",
         max_epochs=150,
-        callbacks=[checkpoints, lr_monitor, LogDataModuleCallback()],
-        logger=wandb_logger
+        callbacks=[
+            checkpoints,
+            lr_monitor,
+            LogDataModuleCallback(),
+            LogModelCallback(),
+            LogTransformationCallback(),
+        ],
+        logger=wandb_logger,
     )
     trainer.fit(model, datamodule=exdark_data)
