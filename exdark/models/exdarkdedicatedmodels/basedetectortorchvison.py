@@ -16,10 +16,8 @@ class BaseDetectorTorchvision(L.LightningModule):
 
     def __init__(
         self,
-        optimizer_class: torch.optim.Optimizer,
-        optimizer_params: dict | None,
-        scheduler_class: torch.optim.lr_scheduler.LRScheduler | None,
-        scheduler_params: dict | None,
+        optimizer: torch.optim.Optimizer,
+        scheduler: torch.optim.lr_scheduler._LRScheduler | None,
         num_classes: int = (len(exdark_coco_like_labels)),
         lr_head: float = 0.005,
         lr_backbone: float = 0.0005,
@@ -59,22 +57,12 @@ class BaseDetectorTorchvision(L.LightningModule):
         self.metric.reset()
 
     def configure_optimizers(self):
-        params = []
-        params.append(
-            {
-                "params": [p for n, p in self.model.named_parameters() if "backbone" in n],
-                "lr": self.hparams.lr_backbone,
-            }
-        )
-        params.append(
-            {
-                "params": [p for n, p in self.model.named_parameters() if "backbone" not in n],
-                "lr": self.hparams.lr_head,
-            }
-        )
-        params = [param for param in self.model.parameters() if param.requires_grad]
-        optimizer = self.hparams.optimizer_class(params, **self.hparams.optimizer_params)
-        if self.hparams.scheduler_class is None:
+        params = [
+            {"params": [p for n, p in self.model.named_parameters() if "backbone" in n], "lr": self.hparams.lr_backbone},
+            {"params": [p for n, p in self.model.named_parameters() if "backbone" not in n], "lr": self.hparams.lr_head},
+        ]
+        optimizer = self.hparams.optimizer(params=params)
+        if self.hparams.scheduler is None:
             return optimizer
-        scheduler = self.hparams.scheduler_class(optimizer, **self.hparams.scheduler_params)
-        return [optimizer], [scheduler]
+        scheduler = self.hparams.scheduler(optimizer=optimizer)
+        return {"optimizer": optimizer, "lr_scheduler": scheduler}

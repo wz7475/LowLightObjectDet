@@ -1,5 +1,6 @@
 import os
-
+import hydra
+from omegaconf import DictConfig
 import lightning as L
 import torch
 import wandb
@@ -8,7 +9,7 @@ from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor
 from lightning.pytorch.loggers import WandbLogger
 
 from exdark.data.datamodules.exdarkdatamodule import ExDarkDataModule
-from exdark.data.datamodules.gaussnoisedatamodule import GaussNoiseExDarkDataModule
+from exdark.data.datamodules.gammadatamodule import GammaBrightenExDarkDataModule
 from exdark.models.exdarkdedicatedmodels.fasterrcnn import FasterRCNN
 from exdark.models.callbacks import (
     LogDataModuleCallback,
@@ -16,14 +17,14 @@ from exdark.models.callbacks import (
     LogTransformationCallback,
 )
 
-if __name__ == "__main__":
-    # data
+def setup_environment():
     load_dotenv()
     os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:512"
-    batch_size = 16
-    exdark_data = ExDarkDataModule(batch_size=batch_size)
 
-    # checkpoints
+def get_data_module(batch_size):
+    return GammaBrightenExDarkDataModule(batch_size=batch_size)
+
+def get_callbacks():
     checkpoints = ModelCheckpoint(
         save_top_k=1,
         mode="max",
@@ -31,36 +32,27 @@ if __name__ == "__main__":
         every_n_epochs=1,
     )
     lr_monitor = LearningRateMonitor(logging_interval="step", log_momentum=True)
+    return [checkpoints, lr_monitor, LogDataModuleCallback(), LogModelCallback(), LogTransformationCallback()]
 
-    # logger
+def get_logger():
     wandb.login(key=os.environ["WANDB_TOKEN"])
-    wandb_logger = WandbLogger(project="exdark")
+    return WandbLogger(project="exdark")
 
-    # model
-    # optimizer = torch.optim.SGD(params, momentum=0.9, weight_decay=self.weight_decay)
-    # lr_scheduler = MultiStepLR(optimizer, milestones=[15, 30], gamma=0.1))
-    optimzer_class = torch.optim.SGD
-    optimizer_params = {"momentum": 0.9, "weight_decay": 0.0005}
-    scheduler_class = torch.optim.lr_scheduler.MultiStepLR
-    scheduler_params = {"milestones": [15, 30], "gamma": 0.1}
-    model = FasterRCNN(
-        optimzer_class,
-        optimizer_params,
-        scheduler_class,
-        scheduler_params,
-        lr_head=0.005,
-        lr_backbone=0.0005,
-    )
+@hydra.main(config_path="../../configs", config_name="config")
+def main(cfg: DictConfig):
+    setup_environment()
+    batch_size = cfg.data.batch_size
+    exdark_data = get_data_module(batch_size)
+    callbacks = get_callbacks()
+    wandb_logger = get_logger()
+    model = hydra.utils.instantiate(cfg.model)
     trainer = L.Trainer(
         accelerator="gpu",
-        max_epochs=150,
-        callbacks=[
-            checkpoints,
-            lr_monitor,
-            LogDataModuleCallback(),
-            LogModelCallback(),
-            LogTransformationCallback(),
-        ],
+        max_epochs=cfg.trainer.max_epochs,
+        callbacks=callbacks,
         logger=wandb_logger,
     )
     trainer.fit(model, datamodule=exdark_data)
+
+if __name__ == "__main__":
+    main()
