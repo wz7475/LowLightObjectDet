@@ -30,14 +30,14 @@ class ExDarkDataModule(L.LightningDataModule):
     ExDarkDataModule provides interface for ExDark data with necessary tools like transformations and dataloaders based
     on ExDarkDataset.
     """
-    def __init__(self, batch_size: int):
+    def __init__(self, batch_size: int, limit_to_n_samples: int | None = None):
         super().__init__()
         self.batch_size = batch_size
         self.train_transforms = self.get_train_transformations()
         self.eval_transforms = self.get_eval_transformations()
         self.predict_transforms = A.Compose([ToTensorV2(p=1.0)])
         self.train_dataset = ExDarkDataset(
-            TRAIN_DIR, RESIZE_TO, RESIZE_TO, self.train_transforms
+            TRAIN_DIR, RESIZE_TO, RESIZE_TO, self.train_transforms, limit_to_n_samples
             # "data/dataset/split/tiny", RESIZE_TO, RESIZE_TO, self.train_transforms
         )
         self.val_dataset = ExDarkDataset(

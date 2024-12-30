@@ -17,3 +17,5 @@ lightning_logs
 lightning_logs_local
 .env
 wandb
+.hydra
+train.log

@@ -8,6 +8,7 @@ from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor, Ea
 from lightning.pytorch.loggers import WandbLogger
 from omegaconf import DictConfig
 
+from exdark.data.datamodules.exdarkdatamodule import ExDarkDataModule
 from exdark.data.datamodules.gammadatamodule import GammaBrightenExDarkDataModule
 from exdark.logging.callbacks import (
     LogDataModuleCallback,
@@ -19,10 +20,6 @@ from exdark.logging.callbacks import (
 def setup_environment():
     load_dotenv()
     os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:512"
-
-
-def get_data_module(batch_size):
-    return GammaBrightenExDarkDataModule(batch_size=batch_size)
 
 
 def get_callbacks():
@@ -52,11 +49,10 @@ def get_logger():
 @hydra.main(config_path="../../configs", config_name="config")
 def main(cfg: DictConfig):
     setup_environment()
-    batch_size = cfg.data.batch_size
-    exdark_data = get_data_module(batch_size)
     callbacks = get_callbacks()
     wandb_logger = get_logger()
     model = hydra.utils.instantiate(cfg.model)
+    exdark_data = hydra.utils.instantiate(cfg.datamodule)
     trainer = L.Trainer(
         accelerator="gpu",
         max_epochs=cfg.trainer.max_epochs,

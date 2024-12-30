@@ -2,8 +2,11 @@ hydra:
   run:
     dir: .
 
-data:
+
+datamodule:
+  _target_: exdark.data.datamodules.exdarkdatamodule.ExDarkDataModule
   batch_size: 16
+  limit_to_n_samples: null
 
 model:
   _target_: exdark.models.exdarkdedicatedmodels.fasterrcnn.FasterRCNN
@@ -21,4 +24,4 @@ model:
   lr_backbone: 0.0005
 
 trainer:
-  max_epochs: 150
+  max_epochs: 80
