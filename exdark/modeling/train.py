@@ -41,7 +41,7 @@ def get_callbacks():
 
 def get_logger():
     wandb.login(key=os.environ["WANDB_TOKEN"])
-    return WandbLogger(project="exdark")
+    return WandbLogger(project="exdark", save_dir="wandb_artifacts")
 
 
 @hydra.main(config_path="../../configs", config_name="config", version_base="1.3")
