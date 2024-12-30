@@ -58,8 +58,8 @@ def main(cfg: DictConfig):
         logger=wandb_logger,
     )
     trainer.fit(model, datamodule=exdark_data)
-    trainer.test(ckpt_path="best")
-
+    test_results = trainer.test(model=model, datamodule=exdark_data, ckpt_path="best")
+    print(test_results)
 
 if __name__ == "__main__":
     # python  exdark/modeling/train.py experiment=exp1

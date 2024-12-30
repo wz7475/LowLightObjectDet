@@ -49,6 +49,18 @@ class BaseDetectorTorchvision(L.LightningModule):
         preds = self.model(images)
         self.metric.update(preds, targets)
 
+    def test_step(self, batch, batch_idx) -> STEP_OUTPUT:
+        images, targets = batch
+        preds = self.model(images)
+        self.metric.update(preds, targets)
+    
+    def on_test_epoch_end(self) -> None:
+        mAP = self.metric.compute()
+        self.log("test_mAP", mAP["map"], prog_bar=True)
+        self.log("test_mAP_50", mAP["map_50"], prog_bar=True)
+        self.log("test_mAP_75", mAP["map_75"], prog_bar=True)
+        self.metric.reset()
+
     def on_validation_epoch_end(self) -> None:
         mAP = self.metric.compute()
         self.log("val_mAP", mAP["map"], prog_bar=True)
