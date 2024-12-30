@@ -1,0 +1,15 @@
+# @package _global_
+
+defaults:
+  - override /model: model
+  - override /datamodule: datamodule
+  - override /trainer: trainer
+
+model:
+  lr_head: 0.1
+
+trainer:
+  max_epochs: 81
+
+datamodule:
+  batch_size: 8

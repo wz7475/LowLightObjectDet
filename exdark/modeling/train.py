@@ -8,8 +8,6 @@ from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor, Ea
 from lightning.pytorch.loggers import WandbLogger
 from omegaconf import DictConfig
 
-from exdark.data.datamodules.exdarkdatamodule import ExDarkDataModule
-from exdark.data.datamodules.gammadatamodule import GammaBrightenExDarkDataModule
 from exdark.logging.callbacks import (
     LogDataModuleCallback,
     LogModelCallback,
@@ -46,7 +44,7 @@ def get_logger():
     return WandbLogger(project="exdark")
 
 
-@hydra.main(config_path="../../configs", config_name="config")
+@hydra.main(config_path="../../configs", config_name="config", version_base="1.3")
 def main(cfg: DictConfig):
     setup_environment()
     callbacks = get_callbacks()
@@ -64,4 +62,6 @@ def main(cfg: DictConfig):
 
 
 if __name__ == "__main__":
+    # python  exdark/modeling/train.py experiment=exp1
+    # python  exdark/modeling/train.py
     main()
