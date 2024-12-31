@@ -16,8 +16,9 @@ class Fcos(BaseDetectorTorchvision):
         num_classes: int = len(exdark_coco_like_labels),
         lr_head: float = 0.005,
         lr_backbone: float = 0.0005,
+        freeze_backbone: bool = False,
     ):
-        super(Fcos, self).__init__(optimizer, scheduler, num_classes, lr_head, lr_backbone)
+        super(Fcos, self).__init__(optimizer, scheduler, num_classes, lr_head, lr_backbone, freeze_backbone)
 
     def _build_model(self, num_classes):
         model = torchvision.models.detection.fcos_resnet50_fpn(weights="DEFAULT")

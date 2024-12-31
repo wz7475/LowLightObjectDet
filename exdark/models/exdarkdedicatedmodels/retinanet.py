@@ -17,8 +17,9 @@ class Retina(BaseDetectorTorchvision):
         num_classes: int = len(exdark_coco_like_labels),
         lr_head: float = 0.005,
         lr_backbone: float = 0.0005,
+        freeze_backbone: bool = False,
     ):
-        super(Retina, self).__init__(optimizer, scheduler, num_classes, lr_head, lr_backbone)
+        super(Retina, self).__init__(optimizer, scheduler, num_classes, lr_head, lr_backbone, freeze_backbone)
 
     def _build_model(self, num_classes):
         model = torchvision.models.detection.retinanet_resnet50_fpn_v2(
@@ -32,7 +33,6 @@ class Retina(BaseDetectorTorchvision):
             norm_layer=partial(torch.nn.GroupNorm, 32),
         )
         return model
-
 
     # def configure_optimizers(self):
     #     lr = 0.01
@@ -55,6 +55,3 @@ class Retina(BaseDetectorTorchvision):
     #     optimizer = torch.optim.SGD(params, momentum=0.9, weight_decay=self.weight_decay)
     #     lr_scheduler = MultiStepLR(optimizer, milestones=[30], gamma=0.1)
     #     return [optimizer], [lr_scheduler]
-
-
-

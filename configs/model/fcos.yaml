@@ -7,3 +7,4 @@ optimizer:
 scheduler: null
 lr_head: 0.01
 lr_backbone: 0.001
+freeze_backbone: false

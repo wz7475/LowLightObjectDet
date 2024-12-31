@@ -21,6 +21,7 @@ class BaseDetectorTorchvision(L.LightningModule):
         num_classes: int = (len(exdark_coco_like_labels)),
         lr_head: float = 0.005,
         lr_backbone: float = 0.0005,
+        freeze_backbone: bool = False,
     ):
         super(BaseDetectorTorchvision, self).__init__()
         self.save_hyperparameters()
@@ -53,7 +54,7 @@ class BaseDetectorTorchvision(L.LightningModule):
         images, targets = batch
         preds = self.model(images)
         self.metric.update(preds, targets)
-    
+
     def on_test_epoch_end(self) -> None:
         mAP = self.metric.compute()
         self.log("test_mAP", mAP["map"], prog_bar=True)
@@ -69,9 +70,23 @@ class BaseDetectorTorchvision(L.LightningModule):
         self.metric.reset()
 
     def configure_optimizers(self):
+        if self.hparams.freeze_backbone:
+            for n, p in self.named_parameters():
+                if "backbone" in n:
+                    p.requires_grad = False
         params = [
-            {"params": [p for n, p in self.model.named_parameters() if "backbone" in n], "lr": self.hparams.lr_backbone},
-            {"params": [p for n, p in self.model.named_parameters() if "backbone" not in n], "lr": self.hparams.lr_head},
+            {
+                "params": [
+                    p
+                    for n, p in self.model.named_parameters()
+                    if "backbone" in n and p.requires_grad
+                ],
+                "lr": self.hparams.lr_backbone,
+            },
+            {
+                "params": [p for n, p in self.model.named_parameters() if "backbone" not in n],
+                "lr": self.hparams.lr_head,
+            },
         ]
         optimizer = self.hparams.optimizer(params=params)
         if self.hparams.scheduler is None:
