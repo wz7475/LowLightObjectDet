@@ -1,0 +1,9 @@
+_target_: exdark.models.exdarkdedicatedmodels.fcos.Fcos
+optimizer:
+  _target_: torch.optim.SGD
+  _partial_: true
+  momentum: 0.9
+  weight_decay: 0.0005
+scheduler: null
+lr_head: 0.01
+lr_backbone: 0.001

@@ -12,7 +12,7 @@ data2/ExDark*
 imageclasslist.txt*
 .pdm-python
 __MACOSX
-temp
+temp*
 lightning_logs
 lightning_logs_local
 .env
