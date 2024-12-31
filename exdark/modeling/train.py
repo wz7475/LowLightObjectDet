@@ -15,9 +15,10 @@ from exdark.logging.callbacks import (
 )
 
 
-def setup_environment():
+def setup_environment(cfg: DictConfig):
     load_dotenv()
     os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:512"
+    L.seed_everything(cfg.seed)
 
 
 def get_callbacks():
@@ -41,12 +42,12 @@ def get_callbacks():
 
 def get_logger():
     wandb.login(key=os.environ["WANDB_TOKEN"])
-    return WandbLogger(project="exdark", save_dir="wandb_artifacts")
+    return WandbLogger(project="exdark", save_dir="wandb_artifacts_tiny_data")
 
 
 @hydra.main(config_path="../../configs", config_name="config", version_base="1.3")
 def main(cfg: DictConfig):
-    setup_environment()
+    setup_environment(cfg)
     callbacks = get_callbacks()
     wandb_logger = get_logger()
     model = hydra.utils.instantiate(cfg.model)
