@@ -1,0 +1,13 @@
+_target_: exdark.models.exdarkdedicatedmodels.transformers.DetectionTransformer
+transformers_checkpoint: facebook/detr-resnet-50
+optimizer:
+  _target_: torch.optim.AdamW
+  _partial_: true
+  weight_decay: 0.0001
+scheduler:
+  _target_: torch.optim.lr_scheduler.ExponentialLR
+  _partial_: true
+  gamma: 0.95
+lr_head: 0.0001
+lr_backbone: 0.00001
+freeze_backbone: false

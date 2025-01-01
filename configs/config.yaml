@@ -2,7 +2,7 @@
 
 defaults:
   - _self_
-  - model: fasterrcnn
+  - model: model
   - datamodule: datamodule
   - trainer: trainer
   - experiment: null

@@ -92,4 +92,4 @@ class BaseDetectorTorchvision(L.LightningModule):
         if self.hparams.scheduler is None:
             return optimizer
         scheduler = self.hparams.scheduler(optimizer=optimizer)
-        return {"optimizer": optimizer, "lr_scheduler": scheduler}
+        return [optimizer], [scheduler]

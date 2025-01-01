@@ -11,24 +11,30 @@ from torch import Tensor
 from torchmetrics.detection import MeanAveragePrecision
 from transformers import AutoModelForObjectDetection, AutoImageProcessor
 
-from exdark.data.preprocess.labels_storage import exdark_idx2label
+from exdark.data.preprocess.labels_storage import exdark_idx2label, exdark_coco_like_labels
 from exdark.data.datamodules.exdarkdatamodule import ExDarkDataModule
 
 
-class Detr(L.LightningModule):
-    def __init__(self, lr, lr_backbone, weight_decay):
-        super(Detr, self).__init__()
+class DetectionTransformer(L.LightningModule):
+    def __init__(
+        self,
+        transformers_checkpoint: str,
+        optimizer: torch.optim.Optimizer,
+        scheduler: torch.optim.lr_scheduler._LRScheduler | None,
+        num_classes: int = (len(exdark_coco_like_labels)),
+        lr_head: float = 0.005,
+        lr_backbone: float = 0.0005,
+        freeze_backbone: bool = False,
+    ):
+        super(DetectionTransformer, self).__init__()
         self.model = AutoModelForObjectDetection.from_pretrained(
-            "SenseTime/deformable-detr-with-box-refine-two-stage",
-            num_labels=len(exdark_idx2label), # TODO check if __background__ should be counted
+            transformers_checkpoint,
+            num_labels=num_classes,
             ignore_mismatched_sizes=True,
         )
         self.image_processor = AutoImageProcessor.from_pretrained(
-            "SenseTime/deformable-detr-with-box-refine-two-stage", do_rescale=False
+            transformers_checkpoint, do_rescale=False
         )
-        self.lr = lr
-        self.lr_backbone = lr_backbone
-        self.weight_decay = weight_decay
         self.save_hyperparameters()
         self.metric = MeanAveragePrecision()
 
@@ -113,63 +119,70 @@ class Detr(L.LightningModule):
 
     def on_validation_epoch_end(self) -> None:
         mAP = self.metric.compute()
-        self.log("val_mAP", mAP['map'], prog_bar=True)
+        self.log("val_mAP", mAP["map"], prog_bar=True)
         self.metric.reset()
 
     def predict_step(self, batch, batch_idx, dataloader_idx=0):
         return self(batch[0])
 
     def configure_optimizers(self):
-        param_dicts = [
+        if self.hparams.freeze_backbone:
+            for n, p in self.named_parameters():
+                if "backbone" in n:
+                    p.requires_grad = False
+        params = [
             {
                 "params": [
-                    p for n, p in self.named_parameters() if "backbone" not in n and p.requires_grad
-                ]
+                    p
+                    for n, p in self.model.named_parameters()
+                    if "backbone" in n and p.requires_grad
+                ],
+                "lr": self.hparams.lr_backbone,
             },
             {
-                "params": [
-                    p for n, p in self.named_parameters() if "backbone" in n and p.requires_grad
-                ],
-                "lr": self.lr_backbone,
+                "params": [p for n, p in self.model.named_parameters() if "backbone" not in n],
+                "lr": self.hparams.lr_head,
             },
         ]
-        optimizer = torch.optim.AdamW(param_dicts, lr=self.lr, weight_decay=self.weight_decay)
-        lr_scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.95)
-        return [optimizer], [lr_scheduler]
+        optimizer = self.hparams.optimizer(params=params)
+        if self.hparams.scheduler is None:
+            return optimizer
+        scheduler = self.hparams.scheduler(optimizer=optimizer)
+        return [optimizer], [scheduler]
 
 
-if __name__ == "__main__":
-    # data
-    batch_size = 6
-    exdark_data = ExDarkDataModule(batch_size)
-
-    # model
-    model = Detr(lr=1e-4, lr_backbone=1e-5, weight_decay=1e-4)
-
-    # training specs
-    checkpoints = ModelCheckpoint(
-        save_top_k=1,
-        mode="max",
-        monitor="val_mAP",
-        save_last=True,
-        every_n_epochs=1,
-    )
-
-    # logging
-    load_dotenv()
-    wandb.login(key=os.environ["WANDB_TOKEN"])
-    wandb_logger = WandbLogger(project="exdark")
-    wandb_logger.experiment.config["batch_size"] = batch_size
-    wandb_logger.experiment.config["datamodule"] = "ExDarkDataModule"
-    wandb_logger.experiment.config["modele"] = "SenseTime/deformable-detr-with-box-refine-two-stage"
-    wandb_logger.experiment.config["augmentations"] = "None"
-    lr_monitor = LearningRateMonitor(logging_interval="step", log_momentum=True)
-
-    # training
-    trainer = L.Trainer(
-        accelerator="gpu",
-        max_epochs=100,
-        callbacks=[checkpoints, lr_monitor],
-        logger=wandb_logger,
-    )
-    trainer.fit(model, datamodule=exdark_data)
+# if __name__ == "__main__":
+#     # data
+#     batch_size = 6
+#     exdark_data = ExDarkDataModule(batch_size)
+#
+#     # model
+#     model = DetectionTransformer(lr=1e-4, lr_backbone=1e-5, weight_decay=1e-4)
+#
+#     # training specs
+#     checkpoints = ModelCheckpoint(
+#         save_top_k=1,
+#         mode="max",
+#         monitor="val_mAP",
+#         save_last=True,
+#         every_n_epochs=1,
+#     )
+#
+#     # logging
+#     load_dotenv()
+#     wandb.login(key=os.environ["WANDB_TOKEN"])
+#     wandb_logger = WandbLogger(project="exdark")
+#     wandb_logger.experiment.config["batch_size"] = batch_size
+#     wandb_logger.experiment.config["datamodule"] = "ExDarkDataModule"
+#     wandb_logger.experiment.config["modele"] = "SenseTime/deformable-detr-with-box-refine-two-stage"
+#     wandb_logger.experiment.config["augmentations"] = "None"
+#     lr_monitor = LearningRateMonitor(logging_interval="step", log_momentum=True)
+#
+#     # training
+#     trainer = L.Trainer(
+#         accelerator="cpu",
+#         max_epochs=100,
+#         callbacks=[checkpoints, lr_monitor],
+#         # logger=wandb_logger,
+#     )
+#     trainer.fit(model, datamodule=exdark_data)
