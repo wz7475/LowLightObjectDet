@@ -1,35 +1,32 @@
-# Object detection in challenging lighting conditions
+# Low-light object detection
+![img.png](doc/readme_imgs/img.png)
 
-This repository contains source code for diploma thesis titled: Object detection in challenging lighting conditions
+System for comparison, training and evaluation methods for low-light object detection.
+
+## Overview
+This project implements object detection models trained on the [ExDark dataset](https://github.com/cs-chan/Exclusively-Dark-Image-Dataset) for detecting objects in low-light environments. It compares them models inferred or trained on LLIE (Low-light images enhancements) improved images.
+
+## Features
+- Fine-tuning of various object detectors on ExDark:
+  - Faster R-CNN 
+  - RetinaNet
+  - FCOS
+  - DETR and Deformable DETR
+- Data augmentation including gamma brightening or image enhancement by external LLIE model
+
+## Tech stack
+- Object detection models from torchvison and transformers
+- Training with PyTorch Lightning
+- Experiment tracking with Weights & Biases
+- Configurable training using Hydra
 
 
-![sample img](doc/readme_imgs/img1.png)
+## Installation
+1. Install dependencies using PDM `pdm install` or `pip install .`
+2. Set up data via `make setup-data`
 
-## Setup
-- environment
-  - make sure to have `wget` and `unzip` installed
-  - install required packages via `pip install .` or `pdm install`
-  - for more details check `pyproject.toml`
-- data
-  - run from root of repository `./prepare_data.sh`
+## Running experiments
+Run `python exdark/modeling/train.py <experiment=fcos_exp>` - choose any configuration file or directly as CLI
+argument override some properties like `model=retinanet model.lr_head=0.02`
 
-## objective
-Framework for:
-- object detection with [ExDark dataset](https://github.com/cs-chan/Exclusively-Dark-Image-Dataset)
-- evaluation different models and fine-tuning them
-
-## Use cases
-- comparing not-fine-tuned object detectors
-- comparing fine-tuned object detectors in standard manner
-- evaluation of image-enhancement techniques
-- evaluation of model trained for challenging conditions with techniques like: siamese network, DANN (domain adversarial neural networks) or auxiliary reconstruction tasl   
-
-## key files descriptions
-```shell
-/data # directory with raw immutable data and script to convert labels and bounding boxes
-configs.py # file with parameters like batch size
-dataloading.py # torch dataset adjusted object detection task
-eval.py # metrics calculation like mAP
-train.py # training loop
-env.yml # conda environment configuration file
-```
+`scripts` directory contains bash scripts with conducted experiments 
