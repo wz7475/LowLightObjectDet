@@ -15,10 +15,11 @@ from exdark.logging.callbacks import (
 )
 
 
-def setup_environment(cfg: DictConfig):
+def setup_environment(seed: int):
     load_dotenv()
     os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:512"
-    L.seed_everything(cfg.seed)
+    os.environ["HYDRA_FULL_ERROR"] = "1"
+    L.seed_everything(seed)
 
 
 def get_callbacks():
@@ -28,7 +29,7 @@ def get_callbacks():
         monitor="val_mAP",
         every_n_epochs=1,
     )
-    early_stopping = EarlyStopping(monitor="val_mAP", mode="max", min_delta=0.005)
+    early_stopping = EarlyStopping(monitor="val_mAP", mode="max", min_delta=0.01, patience=10)
     lr_monitor = LearningRateMonitor(logging_interval="step", log_momentum=True)
     return [
         checkpoints,
@@ -42,12 +43,12 @@ def get_callbacks():
 
 def get_logger():
     wandb.login(key=os.environ["WANDB_TOKEN"])
-    return WandbLogger(project="exdark", save_dir="wandb_artifacts_sandbox")
+    return WandbLogger(project="exdark", save_dir="wandb_artifacts_tiny_data_freeze")
 
 
 @hydra.main(config_path="../../configs", config_name="config", version_base="1.3")
 def main(cfg: DictConfig):
-    setup_environment(cfg)
+    setup_environment(cfg.seed)
     callbacks = get_callbacks()
     wandb_logger = get_logger()
     model = hydra.utils.instantiate(cfg.model)
@@ -55,6 +56,7 @@ def main(cfg: DictConfig):
     trainer = L.Trainer(
         accelerator="gpu",
         max_epochs=cfg.trainer.max_epochs,
+        min_epochs=cfg.trainer.min_epochs,
         callbacks=callbacks,
         logger=wandb_logger,
     )

@@ -1,1 +1,2 @@
 max_epochs: 80
+min_epochs: 10
