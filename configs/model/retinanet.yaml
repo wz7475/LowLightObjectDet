@@ -9,6 +9,6 @@ scheduler:
   _partial_: true
   milestones: [ 15, 30 ]
   gamma: 0.1
-lr_head: 0.01
-lr_backbone: 0.001
+lr_head: 0.002
+lr_backbone: 0.0002
 freeze_backbone: false
