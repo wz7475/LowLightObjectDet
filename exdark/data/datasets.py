@@ -17,7 +17,7 @@ from torch.utils.data import Dataset
 import albumentations as A
 
 from exdark.config import (
-    RESIZE_TO, TEST_DIR
+    RESIZE_TO, TEST_DIR, TRAIN_DIR
 )
 from exdark.visulisation.bbox import draw_bbox_from_targets
 
@@ -40,7 +40,8 @@ class ExDarkDataset(Dataset):
         self.dir_path = dir_path
         self.height = height
         self.width = width
-        self.image_file_types = ['*.jpg', '*.jpeg', '*.png', '*.ppm', '*.JPG']
+        self._all_ext = set()
+        self.image_file_types = ['*.jpg', '*.jpeg', '*.png', '*.JPG', "*.JPEG", "*.PNG"]
         self.all_image_paths = []
 
         # Get all the image paths in sorted order.
@@ -137,7 +138,7 @@ class ExDarkDataset(Dataset):
 
 
 if __name__ == '__main__':
-    dataset = ExDarkDataset(TEST_DIR, RESIZE_TO, RESIZE_TO)
+    dataset = ExDarkDataset(TRAIN_DIR, RESIZE_TO, RESIZE_TO)
 
     for image, target in dataset:
         draw_bbox_from_targets(image, target)
