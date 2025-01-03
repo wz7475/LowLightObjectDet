@@ -12,7 +12,6 @@ do
       "datamodule.limit_to_n_samples=$num_samples" \
       "model=$model" \
       "model.freeze_backbone=true" \
-      "model.lr_head=0.03" \
       "datamodule.batch_size=4") ;
      echo "$num_samples: $output" >> results_tiny_data_model.txt ;
 
