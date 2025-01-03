@@ -1,0 +1,28 @@
+method: grid
+project: exdark
+metric:
+  name: val_mAP
+  goal: maximize
+
+program: exdark/modeling/train.py
+
+command:
+  - ${env}
+  - python
+  - ${program}
+  - ${args_no_hyphens}
+
+parameters:
+  model:
+    values: [ "detr", "def_detr", "def_detr_2" ]
+  model.freeze_backbone:
+    values: [ true, false ]
+  model.lr_head:
+    values: [ 0.0002]
+  model.lr_backbone:
+    values: [ 0.00002 ]
+  trainer.min_epochs:
+    values: [ 40 ]
+  datamodule.batch_size:
+    values: [ 4 ]
+
