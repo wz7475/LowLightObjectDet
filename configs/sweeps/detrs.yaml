@@ -14,15 +14,15 @@ command:
 
 parameters:
   model:
-    values: [ "def_detr_2", def_detr", "detr" ]
+    values: [ "def_detr", "detr", "def_detr_2" ]
   model.freeze_backbone:
-    values: [ true, false ]
+    values: [ false, true ]
   model.lr_head:
     values: [ 0.0002 ]
   model.lr_backbone:
     values: [ 0.00002 ]
   trainer.min_epochs:
-    values: [ 40 ]
+    values: [ 10 ]
   datamodule.batch_size:
     values: [ 7 ]
   datamodule.use_augmentations:
