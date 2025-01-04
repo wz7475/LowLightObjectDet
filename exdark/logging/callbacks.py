@@ -4,8 +4,8 @@ from albumentations.core.transforms_interface import ImageOnlyTransform
 
 class LogTransformationCallback(Callback):
     def on_fit_start(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule") -> None:
-        train_transforms = trainer.datamodule.get_train_transformations()
-        eval_transforms = trainer.datamodule.get_eval_transformations()
+        train_transforms = trainer.datamodule.train_transforms
+        eval_transforms = trainer.datamodule.eval_transforms
         pl_module.logger.log_hyperparams(
             {
                 "train_transforms": self.get_loggable_format(train_transforms),

@@ -10,7 +10,7 @@ from omegaconf import DictConfig
 
 from exdark.logging.callbacks import (
     LogDataModuleCallback,
-    LogModelCallback,
+    LogModelCallback,\
     LogTransformationCallback,
 )
 
@@ -43,7 +43,7 @@ def get_callbacks():
 
 def get_logger():
     wandb.login(key=os.environ["WANDB_TOKEN"])
-    return WandbLogger(project="exdark", save_dir="wandb_artifacts_tiny_data_freeze")
+    return WandbLogger(project="exdark", save_dir="wandb_artifacts_detrs")
 
 
 @hydra.main(config_path="../../configs", config_name="config", version_base="1.3")
