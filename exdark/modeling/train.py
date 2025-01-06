@@ -10,7 +10,7 @@ from omegaconf import DictConfig
 
 from exdark.logging.callbacks import (
     LogDataModuleCallback,
-    LogModelCallback,\
+    LogModelCallback,
     LogTransformationCallback,
 )
 

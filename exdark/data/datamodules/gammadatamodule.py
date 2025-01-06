@@ -20,7 +20,6 @@ class GammaBrightenExDarkDataModule(ExDarkDataModule):
     def get_train_transformations() -> A.Compose:
         return A.Compose([
             A.RandomGamma(gamma_limit=(40, 60), p=1.0),
-            A.Perspective(p=0.1),
             A.HorizontalFlip(p=0.5),
             A.RandomBrightnessContrast(p=0.5),
             A.HueSaturationValue(p=0.1),

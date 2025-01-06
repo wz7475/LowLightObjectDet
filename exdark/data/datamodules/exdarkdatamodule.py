@@ -51,11 +51,9 @@ class ExDarkDataModule(L.LightningDataModule):
     @staticmethod
     def get_train_transformations() -> A.Compose:
         return A.Compose([
-            A.Perspective(p=0.1),
             A.HorizontalFlip(p=0.5),
             A.RandomBrightnessContrast(p=0.5),
             A.HueSaturationValue(p=0.1),
-            A.Rotate(limit=30, p=0.3),
             A.GaussNoise(var_limit=(10.0, 50.0), p=0.3),
             A.GaussianBlur(blur_limit=3, p=0.2),
             A.RandomShadow(p=0.3),

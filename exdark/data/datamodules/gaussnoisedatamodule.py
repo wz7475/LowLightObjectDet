@@ -20,9 +20,10 @@ class GaussNoiseExDarkDataModule(ExDarkDataModule):
     def get_train_transformations() -> A.Compose:
         return A.Compose(
             [
-                A.Perspective(p=0.1),
                 A.HorizontalFlip(p=0.5),
                 A.RandomBrightnessContrast(p=0.5),
+                A.HueSaturationValue(p=0.1),
+                A.RandomShadow(p=0.3),
                 A.GaussNoise(var_limit=(4000, 5000), p=1),
                 ToTensorV2(),
             ],
