@@ -13,8 +13,8 @@ class HVICIDDataModule(ExDarkDataModule):
     HVICIDDataModule is derived from ExDarkDataModule - training and evaluation data is lightened by external 
     model HVICID Net (https://github.com/Fediory/HVI-CIDNet).
     """
-    def __init__(self, batch_size: int):
-        super().__init__(batch_size)
+    def __init__(self, batch_size: int, limit_to_n_samples: int | None = None, use_augmentations: bool=True):
+        super().__init__(batch_size, limit_to_n_samples, use_augmentations)
         self.train_dataset = ExDarkDataset(
             TRAIN_DIR_LIGHTEN, RESIZE_TO, RESIZE_TO, self.train_transforms
             # "data/dataset/split/tiny", RESIZE_TO, RESIZE_TO, self.train_transforms

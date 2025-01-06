@@ -1,0 +1,4 @@
+_target_: exdark.data.datamodules.gammadatamodule.GammaBrightenExDarkDataModule
+batch_size: 16
+limit_to_n_samples: null
+use_augmentations: true

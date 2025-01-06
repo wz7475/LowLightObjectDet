@@ -13,8 +13,8 @@ class GammaBrightenExDarkDataModule(ExDarkDataModule):
     """
     GammaBrightenExDarkDataModule is derived from ExDarkDataModule - training and evaluation data is gamma brightened.
     """
-    def __init__(self, batch_size: int):
-        super().__init__(batch_size)
+    def __init__(self, batch_size: int, limit_to_n_samples: int | None = None, use_augmentations: bool = True):
+        super().__init__(batch_size, limit_to_n_samples, use_augmentations)
 
     @staticmethod
     def get_train_transformations() -> A.Compose:
