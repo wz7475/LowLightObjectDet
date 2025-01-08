@@ -1,0 +1,2 @@
+_target_: exdark.models.cocowrappers.cocowrappertransformers.COCOWrapperTransformers
+transformers_detector_tag: "SenseTime/deformable-detr"

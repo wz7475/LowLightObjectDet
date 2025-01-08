@@ -4,6 +4,7 @@ import lightning as L
 import torch
 from PIL import ImageDraw
 from torch import Tensor
+from torchmetrics.detection import MeanAveragePrecision
 from transformers import (
     AutoImageProcessor,
     AutoModelForObjectDetection,
@@ -20,10 +21,11 @@ class COCOWrapperTransformers(L.LightningModule):
     inference predictions all predictions for categories both present in COCO and ExDark are translated from
     COCO indicates into ExDark indices.
     """
+
     def __init__(
         self,
         transformers_detector_tag: str = "SenseTime/deformable-detr",
-        post_processing_confidence_thr: float = 0.3,
+        post_processing_confidence_thr: float = 0.5,
     ):
         super(COCOWrapperTransformers, self).__init__()
         self.model = AutoModelForObjectDetection.from_pretrained(transformers_detector_tag)
@@ -32,6 +34,7 @@ class COCOWrapperTransformers(L.LightningModule):
         )
         self.post_processing_confidence_thr = post_processing_confidence_thr
         self.categories_map = self._get_transformers_coco_to_exdark_mapping()
+        self.metric = MeanAveragePrecision()
 
     def _get_transformers_coco_to_exdark_mapping(self):
         exdark_categories = [
@@ -89,26 +92,15 @@ class COCOWrapperTransformers(L.LightningModule):
     def predict_step(self, batch, batch_idx, dataloader_idx=0):
         return self(batch[0])
 
+    def test_step(self, batch, batch_idx):
+        images, targets = batch
+        preds = self.forward(images, targets)
+        self.metric.update(preds, targets)
 
-if __name__ == "__main__":
-    device = torch.device("cuda" if torch.cuda.is_available() else "mps")
-    print(device)
-    wrapped_model = COCOWrapperTransformers().to(device)
-    data_iter = iter(ExDarkDataModule(batch_size=2).val_dataloader())
+    def on_test_epoch_end(self) -> None:
+        mAP = self.metric.compute()
+        self.log("test_mAP", mAP["map"], prog_bar=True)
+        self.log("test_mAP_50", mAP["map_50"], prog_bar=True)
+        self.log("test_mAP_75", mAP["map_75"], prog_bar=True)
+        self.metric.reset()
 
-    for _ in range(3):
-        imgs, targets = next(data_iter)
-        img_pil = to_pil_image(imgs[0])
-
-        with torch.no_grad():
-            results = wrapped_model(imgs)
-
-        print(results)
-        draw = ImageDraw.Draw(img_pil)
-        result = results[0]
-        for score, label, box in zip(result["scores"], result["labels"], result["boxes"]):
-            x, y, x2, y2 = tuple(box)
-            draw.rectangle((x, y, x2, y2), outline="red", width=2)
-            draw.text((x, y), exdark_idx2label[label.item()], fill="white")
-
-        img_pil.show()

@@ -1,0 +1,4 @@
+_target_: exdark.models.cocowrappers.cocowrappertorchvision.COCOWrapperTorchvision
+torchvision_detector:
+  _target_: exdark.models.rawcocomodels.get_retinanet_resnet50
+
