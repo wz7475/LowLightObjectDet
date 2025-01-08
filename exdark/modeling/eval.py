@@ -9,7 +9,7 @@ from exdark.modeling.utils import setup_environment
 def main(cfg: DictConfig):
     setup_environment(cfg.seed)
     logger = hydra.utils.instantiate(cfg.logger)
-    model = hydra.utils.instantiate(cfg.model)
+    model = hydra.utils.instantiate(cfg.model, use_extended_logging=logger.supports_extended_logging)
     exdark_data = hydra.utils.instantiate(cfg.datamodule)
     trainer = L.Trainer(
         accelerator=cfg.device,

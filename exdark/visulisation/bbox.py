@@ -49,19 +49,29 @@ def draw_bbox_with_text(img, bbox_pascal_voc, text, color=(0, 0, 255)):
     draw_text(img, text, text_color=color, pos=(int(bbox_pascal_voc[0]), int(bbox_pascal_voc[1] - 5)))
 
 
-def draw_bbox_from_preds(image_rgb: np.array, outputs: dict, threshold: float = 0.5):
-    outputs = [{k: v.to('cpu') for k, v in t.items()} for t in outputs]
-    image_bgr = cv2.cvtColor(image_rgb, cv2.COLOR_RGB2BGR)
+def preprocess_predictions(outputs, threshold):
+    boxes, scores, pred_classes = [], [], []
     if len(outputs[0]['boxes']) != 0:
         boxes = outputs[0]['boxes'].data.numpy()
         scores = outputs[0]['scores'].data.numpy()
-        boxes = boxes[scores >= threshold].astype(np.int32) # scores are sorted from highest to lowest
+        boxes = boxes[scores >= threshold].astype(np.int32)  # scores are sorted from highest to lowest
         pred_classes = outputs[0]['labels'].cpu().numpy()
-        for j, (box, score) in enumerate(zip(boxes, scores)):
-            class_name = exdark_coco_like_labels[pred_classes[j]]
-            text_to_write = f"{class_name} {int(score * 100)}%"
-            color = COLORS[CLASSES_COCO.index(class_name) % NUM_CLASSES_EXDARK]
-            draw_bbox_with_text(image_bgr, box, text_to_write, color)
+    return boxes, scores, pred_classes
+
+def print_predictions(boxes, scores, pred_classes):
+    for j, (box, score) in enumerate(zip(boxes, scores)):
+        class_name = exdark_coco_like_labels[pred_classes[j]]
+        text_to_write = f"{class_name} {int(score * 100)}%"
+        print(text_to_write)
+
+
+def draw_bbox_from_preds(image_rgb: np.array, boxes, scores, pred_classes):
+    image_bgr = cv2.cvtColor(image_rgb, cv2.COLOR_RGB2BGR)
+    for j, (box, score) in enumerate(zip(boxes, scores)):
+        class_name = exdark_coco_like_labels[pred_classes[j]]
+        text_to_write = f"{class_name} {int(score * 100)}%"
+        color = COLORS[CLASSES_COCO.index(class_name) % NUM_CLASSES_EXDARK]
+        draw_bbox_with_text(image_bgr, box, text_to_write, color)
     cv2.imshow('Prediction', image_bgr)
     cv2.waitKey(0)
 

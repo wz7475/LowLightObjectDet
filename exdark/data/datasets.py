@@ -15,8 +15,6 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 
-from exdark.visulisation.bbox import draw_bbox_from_targets
-
 
 class ExDarkDataset(Dataset):
     """
@@ -155,9 +153,3 @@ class ExDarkDataset(Dataset):
     def __len__(self):
         return len(self.all_images)
 
-
-if __name__ == "__main__":
-    dataset = ExDarkDataset(TRAIN_DIR, RESIZE_TO, RESIZE_TO)
-
-    for image, target in dataset:
-        draw_bbox_from_targets(image, target)
