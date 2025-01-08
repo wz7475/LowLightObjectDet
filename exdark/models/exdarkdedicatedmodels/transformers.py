@@ -20,6 +20,7 @@ class DetectionTransformer(L.LightningModule):
         lr_head: float = 0.005,
         lr_backbone: float = 0.0005,
         freeze_backbone: bool = False,
+        use_extended_logging: bool = False,
     ):
         super(DetectionTransformer, self).__init__()
         self.model = AutoModelForObjectDetection.from_pretrained(
@@ -30,7 +31,7 @@ class DetectionTransformer(L.LightningModule):
         self.image_processor = AutoImageProcessor.from_pretrained(
             transformers_checkpoint, do_rescale=False
         )
-        self.save_hyperparameters()
+        self.save_hyperparameters(logger=use_extended_logging)
         self.metric = MeanAveragePrecision()
 
     @staticmethod

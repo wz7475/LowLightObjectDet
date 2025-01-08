@@ -2,6 +2,7 @@ defaults:
   - _self_
   - model: fasterrcnn
   - datamodule: datamodule
+  - logger: wandb
 
 
 seed: 12345
@@ -9,6 +10,8 @@ seed: 12345
 device: "gpu"
 
 ckpt_path: null
+
+logging_offline: false
 
 hydra:
   run:

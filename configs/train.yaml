@@ -5,6 +5,7 @@ defaults:
   - model: fasterrcnn
   - datamodule: datamodule
   - trainer: trainer
+  - logger: wandb
   - experiment: null
 
 seed: 12345

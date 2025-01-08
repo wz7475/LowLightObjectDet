@@ -22,9 +22,10 @@ class BaseDetectorTorchvision(L.LightningModule):
         lr_head: float = 0.005,
         lr_backbone: float = 0.0005,
         freeze_backbone: bool = False,
+        use_extended_logging: bool = False,
     ):
         super(BaseDetectorTorchvision, self).__init__()
-        self.save_hyperparameters()
+        self.save_hyperparameters(logger=use_extended_logging)
 
         self.model = self._build_model(num_classes)
         self.metric = MeanAveragePrecision()

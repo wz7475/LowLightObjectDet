@@ -1,0 +1,4 @@
+_target_: exdark.logging.loggers.ExDarkWandBLogger
+project: "exdark"
+save_dir: "wandb_logs"
+token: ${oc.env:WANDB_TOKEN}

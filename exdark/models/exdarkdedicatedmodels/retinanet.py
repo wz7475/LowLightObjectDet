@@ -18,8 +18,17 @@ class Retina(BaseDetectorTorchvision):
         lr_head: float = 0.005,
         lr_backbone: float = 0.0005,
         freeze_backbone: bool = False,
+        use_extended_logging: bool = False,
     ):
-        super(Retina, self).__init__(optimizer, scheduler, num_classes, lr_head, lr_backbone, freeze_backbone)
+        super(Retina, self).__init__(
+            optimizer,
+            scheduler,
+            num_classes,
+            lr_head,
+            lr_backbone,
+            freeze_backbone,
+            use_extended_logging,
+        )
 
     def _build_model(self, num_classes):
         model = torchvision.models.detection.retinanet_resnet50_fpn_v2(

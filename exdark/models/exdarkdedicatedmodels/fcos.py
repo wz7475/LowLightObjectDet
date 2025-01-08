@@ -17,8 +17,17 @@ class Fcos(BaseDetectorTorchvision):
         lr_head: float = 0.005,
         lr_backbone: float = 0.0005,
         freeze_backbone: bool = False,
+        use_extended_logging: bool = False,
     ):
-        super(Fcos, self).__init__(optimizer, scheduler, num_classes, lr_head, lr_backbone, freeze_backbone)
+        super(Fcos, self).__init__(
+            optimizer,
+            scheduler,
+            num_classes,
+            lr_head,
+            lr_backbone,
+            freeze_backbone,
+            use_extended_logging,
+        )
 
     def _build_model(self, num_classes):
         model = torchvision.models.detection.fcos_resnet50_fpn(weights="DEFAULT")
@@ -32,8 +41,6 @@ class Fcos(BaseDetectorTorchvision):
         model.transform.min_size = (640,)
         model.transform.max_size = 640
         return model
-
-
 
     # def configure_optimizers(self):
     #     lr = 0.01
@@ -49,5 +56,3 @@ class Fcos(BaseDetectorTorchvision):
     #     params = [param for param in self.model.parameters() if param.requires_grad]
     #     optimizer = torch.optim.SGD(params, momentum=0.9, weight_decay=self.weight_decay)
     #     return [optimizer]
-
-
