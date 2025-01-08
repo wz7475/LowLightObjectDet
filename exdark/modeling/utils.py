@@ -1,10 +1,7 @@
 import os
 
 import lightning as L
-import wandb
 from dotenv import load_dotenv
-from lightning.pytorch.loggers import WandbLogger
-from omegaconf import DictConfig
 
 
 def setup_environment(seed: int):
