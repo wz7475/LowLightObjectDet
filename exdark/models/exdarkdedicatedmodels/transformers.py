@@ -1,18 +1,13 @@
-import os
 from typing import Optional
 
 import lightning as L
 import torch
-import wandb
-from dotenv import load_dotenv
-from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor
-from lightning.pytorch.loggers import WandbLogger
+from lightning.pytorch.utilities.types import STEP_OUTPUT
 from torch import Tensor
 from torchmetrics.detection import MeanAveragePrecision
 from transformers import AutoModelForObjectDetection, AutoImageProcessor
 
-from exdark.data.preprocess.labels_storage import exdark_idx2label, exdark_coco_like_labels
-from exdark.data.datamodules.exdarkdatamodule import ExDarkDataModule
+from exdark.data.preprocess.labels_storage import exdark_coco_like_labels
 
 
 class DetectionTransformer(L.LightningModule):
@@ -113,13 +108,28 @@ class DetectionTransformer(L.LightningModule):
         preds = self.image_processor.post_process_object_detection(
             outputs,
             target_sizes=torch.tensor([img.shape[1:] for img in images]),
-            # threshold=0.4,
+        )
+        self.metric.update(preds, targets)
+
+    def test_step(self, batch, batch_idx) -> STEP_OUTPUT:
+        images, targets = batch
+        outputs = self.forward(images, targets)
+        preds = self.image_processor.post_process_object_detection(
+            outputs,
+            target_sizes=torch.tensor([img.shape[1:] for img in images]),
         )
         self.metric.update(preds, targets)
 
     def on_validation_epoch_end(self) -> None:
         mAP = self.metric.compute()
         self.log("val_mAP", mAP["map"], prog_bar=True)
+        self.metric.reset()
+
+    def on_test_epoch_end(self) -> None:
+        mAP = self.metric.compute()
+        self.log("test_mAP", mAP["map"], prog_bar=True)
+        self.log("test_mAP_50", mAP["map_50"], prog_bar=True)
+        self.log("test_mAP_75", mAP["map_75"], prog_bar=True)
         self.metric.reset()
 
     def predict_step(self, batch, batch_idx, dataloader_idx=0):
@@ -149,40 +159,3 @@ class DetectionTransformer(L.LightningModule):
             return optimizer
         scheduler = self.hparams.scheduler(optimizer=optimizer)
         return [optimizer], [scheduler]
-
-
-# if __name__ == "__main__":
-#     # data
-#     batch_size = 6
-#     exdark_data = ExDarkDataModule(batch_size)
-#
-#     # model
-#     model = DetectionTransformer(lr=1e-4, lr_backbone=1e-5, weight_decay=1e-4)
-#
-#     # training specs
-#     checkpoints = ModelCheckpoint(
-#         save_top_k=1,
-#         mode="max",
-#         monitor="val_mAP",
-#         save_last=True,
-#         every_n_epochs=1,
-#     )
-#
-#     # logging
-#     load_dotenv()
-#     wandb.login(key=os.environ["WANDB_TOKEN"])
-#     wandb_logger = WandbLogger(project="exdark")
-#     wandb_logger.experiment.config["batch_size"] = batch_size
-#     wandb_logger.experiment.config["datamodule"] = "ExDarkDataModule"
-#     wandb_logger.experiment.config["modele"] = "SenseTime/deformable-detr-with-box-refine-two-stage"
-#     wandb_logger.experiment.config["augmentations"] = "None"
-#     lr_monitor = LearningRateMonitor(logging_interval="step", log_momentum=True)
-#
-#     # training
-#     trainer = L.Trainer(
-#         accelerator="cpu",
-#         max_epochs=100,
-#         callbacks=[checkpoints, lr_monitor],
-#         # logger=wandb_logger,
-#     )
-#     trainer.fit(model, datamodule=exdark_data)
