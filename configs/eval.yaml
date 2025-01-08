@@ -1,0 +1,15 @@
+defaults:
+  - _self_
+  - model: fasterrcnn
+  - datamodule: datamodule
+
+
+seed: 12345
+
+device: "gpu"
+
+ckpt_path: null
+
+hydra:
+  run:
+    dir: .

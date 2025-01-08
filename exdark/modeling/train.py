@@ -1,11 +1,6 @@
-import os
-
 import hydra
 import lightning as L
-import wandb
-from dotenv import load_dotenv
 from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor, EarlyStopping
-from lightning.pytorch.loggers import WandbLogger
 from omegaconf import DictConfig
 
 from exdark.logging.callbacks import (
@@ -13,13 +8,7 @@ from exdark.logging.callbacks import (
     LogModelCallback,
     LogTransformationCallback,
 )
-
-
-def setup_environment(seed: int):
-    load_dotenv()
-    os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:512"
-    os.environ["HYDRA_FULL_ERROR"] = "1"
-    L.seed_everything(seed)
+from exdark.modeling.utils import setup_environment, get_logger
 
 
 def get_callbacks():
@@ -41,12 +30,7 @@ def get_callbacks():
     ]
 
 
-def get_logger():
-    wandb.login(key=os.environ["WANDB_TOKEN"])
-    return WandbLogger(project="exdark", save_dir="wandb_artifacts_detrs")
-
-
-@hydra.main(config_path="../../configs", config_name="config", version_base="1.3")
+@hydra.main(config_path="../../configs", config_name="train", version_base="1.3")
 def main(cfg: DictConfig):
     setup_environment(cfg.seed)
     callbacks = get_callbacks()
@@ -54,7 +38,7 @@ def main(cfg: DictConfig):
     model = hydra.utils.instantiate(cfg.model)
     exdark_data = hydra.utils.instantiate(cfg.datamodule)
     trainer = L.Trainer(
-        accelerator="gpu",
+        accelerator=cfg.device,
         max_epochs=cfg.trainer.max_epochs,
         min_epochs=cfg.trainer.min_epochs,
         callbacks=callbacks,
