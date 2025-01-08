@@ -8,17 +8,13 @@ image dataset, supporting object detection tasks in low-light conditions.
 import glob as glob
 import os
 import random
-from typing import Literal
 
+import albumentations as A
 import cv2
 import numpy as np
 import torch
 from torch.utils.data import Dataset
-import albumentations as A
 
-from exdark.config import (
-    RESIZE_TO, TEST_DIR, TRAIN_DIR
-)
 from exdark.visulisation.bbox import draw_bbox_from_targets
 
 
@@ -35,13 +31,21 @@ class ExDarkDataset(Dataset):
         limit_to_n_samples (int, optional): Limit dataset to first n samples.
             Defaults to None (use full dataset)
     """
-    def __init__(self, dir_path, width, height, transforms: A.Compose=None, limit_to_n_samples: int | None = None):
+
+    def __init__(
+        self,
+        dir_path,
+        width,
+        height,
+        transforms: A.Compose = None,
+        limit_to_n_samples: int | None = None,
+    ):
         self.transforms = transforms
         self.dir_path = dir_path
         self.height = height
         self.width = width
         self._all_ext = set()
-        self.image_file_types = ['*.jpg', '*.jpeg', '*.png', '*.JPG', "*.JPEG", "*.PNG"]
+        self.image_file_types = ["*.jpg", "*.jpeg", "*.png", "*.JPG", "*.JPEG", "*.PNG"]
         self.all_image_paths = []
 
         # Get all the image paths in sorted order.
@@ -60,9 +64,9 @@ class ExDarkDataset(Dataset):
         b = raw_bbox[3]
         return [
             max((l / img_width) * self.width, 0),
-            max((t/ img_height) * self.height, 0),
-            min(((l+a) / img_width) * self.width, self.width),
-            min(((t+b) / img_height) * self.height, self.height)
+            max((t / img_height) * self.height, 0),
+            min(((l + a) / img_width) * self.width, self.width),
+            min(((t + b) / img_height) * self.height, self.height),
         ]
 
     def _get_target(self, image: np.array, annot_file_path: str, idx: int):
@@ -72,22 +76,31 @@ class ExDarkDataset(Dataset):
         image_height = image.shape[0]
 
         # read bboxes coordinates in coco style and convert them to pascal voc style
-        with open(annot_file_path, 'r') as file:
+        with open(annot_file_path, "r") as file:
             for line in file.readlines():
                 object_info = line.strip().split(",")
                 labels.append(int(object_info[0]))
-                boxes.append(self._get_bbox([float(x) for x in object_info[1:5]], image_width, image_height))
+                boxes.append(
+                    self._get_bbox([float(x) for x in object_info[1:5]], image_width, image_height)
+                )
         boxes = torch.as_tensor(boxes, dtype=torch.float32)
-        area = (boxes[:, 3] - boxes[:, 1]) * (boxes[:, 2] - boxes[:, 0]) if len(boxes) > 0 \
+        area = (
+            (boxes[:, 3] - boxes[:, 1]) * (boxes[:, 2] - boxes[:, 0])
+            if len(boxes) > 0
             else torch.as_tensor(boxes, dtype=torch.float32)
+        )
         iscrowd = torch.zeros((boxes.shape[0],), dtype=torch.int64)
         labels = torch.as_tensor(labels, dtype=torch.int64)
         target = {}
         target["boxes"] = boxes
         target["labels"] = labels
         target["size"] = torch.tensor([self.height, self.width])
-        target["area"] = area  # area can be used to for evaluation to group small, medium and large objects
-        target["iscrowd"] = iscrowd  # iscrowd set to True indicates crowd i.e. to ignore this objects
+        target["area"] = (
+            area  # area can be used to for evaluation to group small, medium and large objects
+        )
+        target["iscrowd"] = (
+            iscrowd  # iscrowd set to True indicates crowd i.e. to ignore this objects
+        )
         image_id = torch.tensor([idx])
         target["image_id"] = image_id
         return target
@@ -116,28 +129,34 @@ class ExDarkDataset(Dataset):
         annot_filename = image_name.lower() + ".txt"
         annot_file_path = os.path.join(self.dir_path, annot_filename)
 
-        target = self._get_target(image, annot_file_path, idx) if os.path.exists(annot_file_path) else None
+        target = (
+            self._get_target(image, annot_file_path, idx)
+            if os.path.exists(annot_file_path)
+            else None
+        )
 
         # Apply the image transforms.
         if self.transforms:
             if target:
-                sample = self.transforms(image=image_resized,
-                                         bboxes=target['boxes'],
-                                         labels=target["labels"])
-                target['boxes'] = torch.Tensor(sample['bboxes'])
-                image_resized = sample['image']
-                if np.isnan((target['boxes']).numpy()).any() or target['boxes'].shape == torch.Size([0]):
-                    target['boxes'] = torch.zeros((0, 4), dtype=torch.int64)
+                sample = self.transforms(
+                    image=image_resized, bboxes=target["boxes"], labels=target["labels"]
+                )
+                target["boxes"] = torch.Tensor(sample["bboxes"])
+                image_resized = sample["image"]
+                if np.isnan((target["boxes"]).numpy()).any() or target["boxes"].shape == torch.Size(
+                    [0]
+                ):
+                    target["boxes"] = torch.zeros((0, 4), dtype=torch.int64)
             else:
                 sample = self.transforms(image=image_resized)
-                image_resized = sample['image']
+                image_resized = sample["image"]
         return image_resized, target
 
     def __len__(self):
         return len(self.all_images)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     dataset = ExDarkDataset(TRAIN_DIR, RESIZE_TO, RESIZE_TO)
 
     for image, target in dataset:

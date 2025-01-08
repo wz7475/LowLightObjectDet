@@ -9,6 +9,8 @@ defaults:
 
 seed: 12345
 
+device: "gpu"
+
 hydra:
   run:
     dir: .

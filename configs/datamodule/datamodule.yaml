@@ -1,4 +1,8 @@
 _target_: exdark.data.datamodules.exdarkdatamodule.ExDarkDataModule
 batch_size: 16
+train_set_path: "data/dataset/split/train"
+val_set_path: "data/dataset/split/val"
+test_set_path: "data/dataset/split/test"
+resize_img_size: 640
 limit_to_n_samples: null
 use_augmentations: true
