@@ -6,15 +6,16 @@ FLAT_ANNO_DIR := $(DATASET_DIR)/flat_anno
 FLAT_ANNO_COCO_DIR := $(DATASET_DIR)/flat_anno_coco
 PREPROCESS_SCRIPTS := exdark/data/preprocess
 DOWNLOAD_URL := https://drive.usercontent.google.com/download?id=1BHmPgu8EsHoFDDkMGLVoXIlCth2dW6Yx&export=download&authuser=0&confirm=t&uuid=3232338f-26c7-4599-9f35-f5c93b8241e4&at=AO7h07dJS6_aNoNQUhl1VrZ_c3gt:1726826664489
+DOWNLOAD_HVICID_URL := https://drive.usercontent.google.com/download?id=1JIVDlosrrPBXDn8rh_Xdi-Dzmk_VhlgU&export=download&confirm=t&uuid=cfcc0052-1517-4367-8d7d-898926888ef0&at=AIrpjvNn2klM59SEoBvwi5zL361U%3A1736412257826
 
-.PHONY: data-setup data-download data-process data-split data-cleanup tests
+.PHONY: data-setup data-download data-process data-split data-cleanup data-full-cleanup data-hvicid tests
 
 # Main target that runs the full data preparation pipeline
-data-setup: data-download data-process data-split data-temp-cleanup
+data-setup: data-download data-process data-split data-temp-cleanup data-hvicid
 
 # Download and extract data
 data-download:
-	wget '$(DOWNLOAD_URL)' -O $(DATA_DIR)/ExDark.zip && \	#wget '$(DOWNLOAD_URL)' -O $(DATA_DIR)/ExDark.zip && \
+	wget '$(DOWNLOAD_URL)' -O $(DATA_DIR)/ExDark.zip && \
 	cd $(DATA_DIR) && \
 	unzip ExDark.zip && \
 	unzip ExDark_Annno.zip && \
@@ -40,6 +41,14 @@ data-process:
 data-split:
 	python $(PREPROCESS_SCRIPTS)/train_test_val.py $(DATASET_DIR)/imageclasslist.txt.coco $(DATASET_DIR)/split $(FLAT_DIR) $(FLAT_ANNO_COCO_DIR) ,
 
+data-hvicid:
+	mkdir -p $(DATASET_DIR)/hvicid && \
+	wget '$(DOWNLOAD_HVICID_URL)' -O $(DATASET_DIR)/hvicid/HVICID.zip && \
+	cd $(DATASET_DIR)/hvicid && \
+	unzip HVICID.zip && \
+	rm HVICID.zip && \
+	rm -rf __MACOSX
+
 # Cleanup temporary directories
 data-temp-cleanup:
 	cd $(DATA_DIR) && rm -rf $(FLAT_DIR) $(FLAT_ANNO_DIR) $(FLAT_ANNO_COCO_DIR) $(DATASET_DIR)/imageclasslist.txt.coco
@@ -49,11 +58,3 @@ data-full-cleanup:
 
 tests:
 	pytest tests
-
-#.PHONY: get-tiny-data
-#get-tiny-data:
-#	cd data && sh get_tiny_data.sh
-#
-#.PHONY: clean-tiny-data
-#clean-tiny-data:
-#	rm -r ./data/dataset/split/tiny*

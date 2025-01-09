@@ -1,0 +1,3 @@
+[submodule "HVI-CIDNet-inference"]
+	path = external/HVI-CIDNet-inference
+	url = git@github.com:wz7475/HVI-CIDNet-inference.git
