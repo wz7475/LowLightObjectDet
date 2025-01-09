@@ -1,8 +1,8 @@
 _target_: exdark.data.datamodules.exdarkdatamodule.ExDarkDataModule
 batch_size: 16
-train_set_path: "data/dataset/split/train_lighten"
-val_set_path: "data/dataset/split/val_lighten"
-test_set_path: "data/dataset/split/test_lighten"
+train_set_path: "data/dataset/hvicid/train_lighten"
+val_set_path: "data/dataset/hvicid/val_lighten"
+test_set_path: "data/dataset/hvicid/test_lighten"
 resize_img_size: 640
 limit_to_n_samples: null
 use_augmentations: true

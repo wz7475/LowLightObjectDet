@@ -76,11 +76,10 @@ def draw_bbox_from_preds(image_rgb: np.array, boxes, scores, pred_classes):
     cv2.waitKey(0)
 
 
-def draw_bbox_from_targets(image_rgb: np.array, target: dict):
-    try:
-        image_bgr = cv2.cvtColor(image_rgb, cv2.COLOR_RGB2BGR)
-    except:
-        image_bgr = cv2.cvtColor(image_rgb.detach().cpu().numpy(), cv2.COLOR_RGB2BGR)
+def draw_bbox_from_targets(image_tensor, target: dict):
+    image_rgb = image_tensor.permute(1, 2, 0).cpu().numpy()  # Convert tensor to numpy array and change channel order
+    image_bgr = cv2.cvtColor(image_rgb, cv2.COLOR_RGB2BGR)
+
 
     for box_num in range(len(target['boxes'])):
         box = target['boxes'][box_num]

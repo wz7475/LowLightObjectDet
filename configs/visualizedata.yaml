@@ -1,0 +1,8 @@
+# @package _global_
+
+defaults:
+  - _self_
+  - datamodule: datamodule
+
+
+num_samples_to_visualize: 5
