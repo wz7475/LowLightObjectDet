@@ -19,3 +19,4 @@ lightning_logs_local
 wandb
 .hydra
 train.log
+wandb_logs
