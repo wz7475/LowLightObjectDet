@@ -51,7 +51,7 @@ data-hvicid:
 
 # Cleanup temporary directories
 data-temp-cleanup:
-	cd $(DATA_DIR) && rm -rf $(FLAT_DIR) $(FLAT_ANNO_DIR) $(FLAT_ANNO_COCO_DIR) $(DATASET_DIR)/imageclasslist.txt.coco
+	rm -rf $(FLAT_DIR) $(FLAT_ANNO_DIR) $(FLAT_ANNO_COCO_DIR) $(DATASET_DIR)/imageclasslist.txt.coco
 
 data-full-cleanup:
 	rm -rf $(DATA_DIR)
