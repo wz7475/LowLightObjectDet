@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-from exdark.config import CLASSES_COCO, NUM_CLASSES_EXDARK
+from exdark.data.config import CLASSES_COCO, NUM_CLASSES_EXDARK
 from exdark.data.preprocess.labels_storage import (
     exdark_idx2label,
     exdark_coco_like_labels,
