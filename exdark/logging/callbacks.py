@@ -1,9 +1,12 @@
 from lightning import Callback
 from albumentations.core.transforms_interface import ImageOnlyTransform
+import pytorch_lightning as pl
 
 
 class LogTransformationCallback(Callback):
-    def on_fit_start(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule") -> None:
+    def on_fit_start(
+        self, trainer: "pl.Trainer", pl_module: "pl.LightningModule"
+    ) -> None:
         train_transforms = trainer.datamodule.train_transforms
         eval_transforms = trainer.datamodule.eval_transforms
         pl_module.logger.log_hyperparams(
@@ -30,8 +33,13 @@ class LogTransformationCallback(Callback):
         Extract explict params set in initialization
         """
         default_transforms = transform.__class__()
-        default_transforms_params = default_transforms.get_transform_init_args() | default_transforms.get_base_init_args()
-        received_transforms_params = transform.get_transform_init_args() | transform.get_base_init_args()
+        default_transforms_params = (
+            default_transforms.get_transform_init_args()
+            | default_transforms.get_base_init_args()
+        )
+        received_transforms_params = (
+            transform.get_transform_init_args() | transform.get_base_init_args()
+        )
         explicit_params = {}
         for param, value in received_transforms_params.items():
             default_value = default_transforms_params.get(param)

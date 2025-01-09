@@ -18,7 +18,9 @@ def mock_image_files():
 @patch("glob.glob")
 def test_init_with_limit_samples(mock_glob, mock_image_files):
     mock_glob.return_value = mock_image_files
-    dataset = ExDarkDataset(dir_path="/test/path", width=640, height=480, limit_to_n_samples=2)
+    dataset = ExDarkDataset(
+        dir_path="/test/path", width=640, height=480, limit_to_n_samples=2
+    )
     assert len(dataset.all_images) == 2
 
 

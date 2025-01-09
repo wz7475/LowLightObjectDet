@@ -13,9 +13,9 @@ def setup_directories():
     destination_dir = tempfile.mkdtemp()
 
     for i in range(5):
-        with open(os.path.join(source_dir, f"image_{i}.jpg"), 'w') as f:
+        with open(os.path.join(source_dir, f"image_{i}.jpg"), "w") as f:
             f.write("image content")
-        with open(os.path.join(source_dir, f"image_{i}.jpg.txt"), 'w') as f:
+        with open(os.path.join(source_dir, f"image_{i}.jpg.txt"), "w") as f:
             f.write("annotation content")
 
     yield source_dir, destination_dir
@@ -23,18 +23,22 @@ def setup_directories():
     shutil.rmtree(source_dir)
     shutil.rmtree(destination_dir)
 
+
 def test_create_subset_dir_not_enough_images(setup_directories):
     source_dir, destination_dir = setup_directories
     with pytest.raises(NonEnoughImagesError):
         create_subset_dir(source_dir, destination_dir, 10)
+
 
 def test_create_subset_dir_success(setup_directories):
     source_dir, destination_dir = setup_directories
     create_subset_dir(source_dir, destination_dir, 3)
 
     copied_images = [f for f in os.listdir(destination_dir) if f.endswith(".jpg")]
-    copied_annotations = [f for f in os.listdir(destination_dir) if f.endswith(".jpg.txt")]
-    
+    copied_annotations = [
+        f for f in os.listdir(destination_dir) if f.endswith(".jpg.txt")
+    ]
+
     assert len(copied_images) == 3
     assert len(copied_annotations) == 3
     for img in copied_images:

@@ -9,13 +9,17 @@ from exdark.modeling.utils import setup_environment
 def main(cfg: DictConfig):
     setup_environment(cfg.seed)
     logger = hydra.utils.instantiate(cfg.logger)
-    model = hydra.utils.instantiate(cfg.model, use_extended_logging=logger.supports_extended_logging)
+    model = hydra.utils.instantiate(
+        cfg.model, use_extended_logging=logger.supports_extended_logging
+    )
     exdark_data = hydra.utils.instantiate(cfg.datamodule)
     trainer = L.Trainer(
         accelerator=cfg.device,
         logger=logger,
     )
-    test_results = trainer.test(model=model, datamodule=exdark_data, ckpt_path=cfg.ckpt_path)
+    test_results = trainer.test(
+        model=model, datamodule=exdark_data, ckpt_path=cfg.ckpt_path
+    )
     print(test_results)
 
 

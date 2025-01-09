@@ -14,14 +14,14 @@ class GaussNoiseExDarkDataModule(ExDarkDataModule):
     """
 
     def __init__(
-            self,
-            batch_size: int,
-            train_set_path: str,
-            val_set_path: str,
-            test_set_path: str,
-            resize_img_size: int,
-            limit_to_n_samples: int | None = None,
-            use_augmentations: bool = True,
+        self,
+        batch_size: int,
+        train_set_path: str,
+        val_set_path: str,
+        test_set_path: str,
+        resize_img_size: int,
+        limit_to_n_samples: int | None = None,
+        use_augmentations: bool = True,
     ):
         super().__init__(
             batch_size,

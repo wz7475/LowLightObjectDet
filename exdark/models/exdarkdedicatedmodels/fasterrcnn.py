@@ -2,7 +2,9 @@ import torch
 import torchvision
 
 from exdark.data.preprocess.labels_storage import exdark_coco_like_labels
-from exdark.models.exdarkdedicatedmodels.basedetectortorchvison import BaseDetectorTorchvision
+from exdark.models.exdarkdedicatedmodels.basedetectortorchvison import (
+    BaseDetectorTorchvision,
+)
 
 
 class FasterRCNN(BaseDetectorTorchvision):
@@ -38,7 +40,9 @@ class FasterRCNN(BaseDetectorTorchvision):
         )
         # replace head for different num of classes
         in_features = model.roi_heads.box_predictor.cls_score.in_features
-        model.roi_heads.box_predictor = torchvision.models.detection.faster_rcnn.FastRCNNPredictor(
-            in_channels=in_features, num_classes=num_classes
+        model.roi_heads.box_predictor = (
+            torchvision.models.detection.faster_rcnn.FastRCNNPredictor(
+                in_channels=in_features, num_classes=num_classes
+            )
         )
         return model

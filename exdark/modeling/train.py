@@ -1,6 +1,10 @@
 import hydra
 import lightning as L
-from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor, EarlyStopping
+from lightning.pytorch.callbacks import (
+    ModelCheckpoint,
+    LearningRateMonitor,
+    EarlyStopping,
+)
 from omegaconf import DictConfig
 
 from exdark.logging.callbacks import (
@@ -36,7 +40,9 @@ def main(cfg: DictConfig):
     setup_environment(cfg.seed)
     logger: ExDarkLogger = hydra.utils.instantiate(cfg.logger)
     callbacks = get_callbacks(use_extended_logging=logger.supports_extended_logging)
-    model = hydra.utils.instantiate(cfg.model, use_extended_logging=logger.supports_extended_logging)
+    model = hydra.utils.instantiate(
+        cfg.model, use_extended_logging=logger.supports_extended_logging
+    )
     exdark_data = hydra.utils.instantiate(cfg.datamodule)
     trainer = L.Trainer(
         accelerator=cfg.device,

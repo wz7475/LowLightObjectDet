@@ -10,7 +10,11 @@ from lightning import LightningModule, Trainer
 from omegaconf import DictConfig
 
 from exdark.modeling.utils import setup_environment
-from exdark.visulisation.bbox import draw_bbox_from_preds, preprocess_predictions, print_predictions
+from exdark.visulisation.bbox import (
+    draw_bbox_from_preds,
+    preprocess_predictions,
+    print_predictions,
+)
 
 
 class InferenceDataset(torch.utils.data.Dataset):

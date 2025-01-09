@@ -5,7 +5,9 @@ import torchvision
 from torchvision.models.detection.fcos import FCOSClassificationHead
 
 from exdark.data.preprocess.labels_storage import exdark_coco_like_labels
-from exdark.models.exdarkdedicatedmodels.basedetectortorchvison import BaseDetectorTorchvision
+from exdark.models.exdarkdedicatedmodels.basedetectortorchvison import (
+    BaseDetectorTorchvision,
+)
 
 
 class Fcos(BaseDetectorTorchvision):

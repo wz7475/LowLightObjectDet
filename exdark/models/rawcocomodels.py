@@ -12,7 +12,9 @@ from torchvision.models.detection import (
 
 
 def get_faster_rcnn_resnet50() -> FasterRCNN:
-    return fasterrcnn_resnet50_fpn_v2(weights=FasterRCNN_ResNet50_FPN_V2_Weights.DEFAULT)
+    return fasterrcnn_resnet50_fpn_v2(
+        weights=FasterRCNN_ResNet50_FPN_V2_Weights.DEFAULT
+    )
 
 
 def get_fcos_resnet50() -> FCOS:

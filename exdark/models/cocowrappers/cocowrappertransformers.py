@@ -2,17 +2,12 @@ from typing import Optional
 
 import lightning as L
 import torch
-from PIL import ImageDraw
 from torch import Tensor
 from torchmetrics.detection import MeanAveragePrecision
 from transformers import (
     AutoImageProcessor,
     AutoModelForObjectDetection,
 )
-from transformers.image_transforms import to_pil_image
-
-from exdark.data.preprocess.labels_storage import exdark_idx2label
-from exdark.data.datamodules.exdarkdatamodule import ExDarkDataModule
 
 
 class COCOWrapperTransformers(L.LightningModule):
@@ -28,7 +23,9 @@ class COCOWrapperTransformers(L.LightningModule):
         post_processing_confidence_thr: float = 0.5,
     ):
         super(COCOWrapperTransformers, self).__init__()
-        self.model = AutoModelForObjectDetection.from_pretrained(transformers_detector_tag)
+        self.model = AutoModelForObjectDetection.from_pretrained(
+            transformers_detector_tag
+        )
         self.image_processor = AutoImageProcessor.from_pretrained(
             transformers_detector_tag, do_rescale=False
         )
@@ -78,7 +75,9 @@ class COCOWrapperTransformers(L.LightningModule):
             )
         return filtered_detections_list
 
-    def forward(self, images: list[Tensor], targets: Optional[list[dict[str, Tensor]]] = None):
+    def forward(
+        self, images: list[Tensor], targets: Optional[list[dict[str, Tensor]]] = None
+    ):
         input_encoding = self.image_processor(images, return_tensors="pt")
         input_encoding = {k: v.to(self.device) for k, v in input_encoding.items()}
         output_encoding = self.model(**input_encoding)
@@ -103,4 +102,3 @@ class COCOWrapperTransformers(L.LightningModule):
         self.log("test_mAP_50", mAP["map_50"], prog_bar=True)
         self.log("test_mAP_75", mAP["map_75"], prog_bar=True)
         self.metric.reset()
-

@@ -16,9 +16,11 @@ def get_annotation_path(img_path: str) -> str:
     return f"{img_path.lower()}.txt"
 
 
-def create_subset_dir(dir_for_sampling: str, destination_dir: str, num_samples: int) -> None:
+def create_subset_dir(
+    dir_for_sampling: str, destination_dir: str, num_samples: int
+) -> None:
     """
-    Creates a subset directory by sampling a specified number of images and their corresponding annotations 
+    Creates a subset directory by sampling a specified number of images and their corresponding annotations
     from the source directory and copying them to the destination directory.
 
     Args:
@@ -34,7 +36,9 @@ def create_subset_dir(dir_for_sampling: str, destination_dir: str, num_samples: 
     """
     os.makedirs(destination_dir, exist_ok=True)
     img_filenames = [
-        filename for filename in os.listdir(dir_for_sampling) if not filename.endswith("txt")
+        filename
+        for filename in os.listdir(dir_for_sampling)
+        if not filename.endswith("txt")
     ]
     if len(img_filenames) < num_samples:
         raise NonEnoughImagesError()
@@ -49,17 +53,34 @@ def create_subset_dir(dir_for_sampling: str, destination_dir: str, num_samples: 
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Sample images and their annotations from a directory.")
-    parser.add_argument("dir_for_sampling", type=str, help="The directory containing the images to sample from.")
-    parser.add_argument("destination_dir", type=str, help="The directory where the sampled images and annotations will be copied to.")
-    parser.add_argument("num_samples", type=int, help="The number of images (and their annotations) to sample and copy.")
-    
+    parser = argparse.ArgumentParser(
+        description="Sample images and their annotations from a directory."
+    )
+    parser.add_argument(
+        "dir_for_sampling",
+        type=str,
+        help="The directory containing the images to sample from.",
+    )
+    parser.add_argument(
+        "destination_dir",
+        type=str,
+        help="The directory where the sampled images and annotations will be copied to.",
+    )
+    parser.add_argument(
+        "num_samples",
+        type=int,
+        help="The number of images (and their annotations) to sample and copy.",
+    )
+
     args = parser.parse_args()
-    
+
     try:
         create_subset_dir(args.dir_for_sampling, args.destination_dir, args.num_samples)
     except NonEnoughImagesError:
-        print("Not enough images available in the source directory to sample the requested number of images.")
+        print(
+            "Not enough images available in the source directory to sample the requested number of images."
+        )
+
 
 if __name__ == "__main__":
     main()

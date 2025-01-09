@@ -1,7 +1,6 @@
-import os
-
 from pytorch_lightning.loggers import WandbLogger, CSVLogger, Logger
 import wandb
+
 
 class ExDarkLogger(Logger):
     def __init__(self, *args, **kwargs):

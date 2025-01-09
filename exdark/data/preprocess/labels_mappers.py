@@ -3,7 +3,9 @@ from typing import List, Tuple
 from labels_storage import exdark2coco_exceptions
 
 
-def generate_exdark2coco_mapping(coco_categories: List[str], exdark_categories: List[str]) -> Tuple[dict, dict]:
+def generate_exdark2coco_mapping(
+    coco_categories: List[str], exdark_categories: List[str]
+) -> Tuple[dict, dict]:
     mapping_idx = {}
     mapping_cat = {}
     for idx_exdark, category_exdark in enumerate(exdark_categories):

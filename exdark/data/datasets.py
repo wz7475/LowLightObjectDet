@@ -1,7 +1,7 @@
 """
 Dataset module for loading and preprocessing images from the ExDark dataset.
 
-This module provides dataset classes for working with the Exclusively Dark (ExDark) 
+This module provides dataset classes for working with the Exclusively Dark (ExDark)
 image dataset, supporting object detection tasks in low-light conditions.
 """
 
@@ -48,23 +48,29 @@ class ExDarkDataset(Dataset):
 
         # Get all the image paths in sorted order.
         for file_type in self.image_file_types:
-            self.all_image_paths.extend(glob.glob(os.path.join(self.dir_path, file_type)))
-        self.all_images = [image_path.split(os.path.sep)[-1] for image_path in self.all_image_paths]
+            self.all_image_paths.extend(
+                glob.glob(os.path.join(self.dir_path, file_type))
+            )
+        self.all_images = [
+            image_path.split(os.path.sep)[-1] for image_path in self.all_image_paths
+        ]
         if limit_to_n_samples:
             self.all_images = random.sample(self.all_images, limit_to_n_samples)
         else:
             self.all_images = sorted(self.all_images)
 
-    def _get_bbox(self, raw_bbox: list[float], img_width: float, img_height: float) -> list[float]:
-        l = raw_bbox[0]
-        t = raw_bbox[1]
+    def _get_bbox(
+        self, raw_bbox: list[float], img_width: float, img_height: float
+    ) -> list[float]:
+        left = raw_bbox[0]
+        top = raw_bbox[1]
         a = raw_bbox[2]
         b = raw_bbox[3]
         return [
-            max((l / img_width) * self.width, 0),
-            max((t / img_height) * self.height, 0),
-            min(((l + a) / img_width) * self.width, self.width),
-            min(((t + b) / img_height) * self.height, self.height),
+            max((left / img_width) * self.width, 0),
+            max((top / img_height) * self.height, 0),
+            min(((left + a) / img_width) * self.width, self.width),
+            min(((top + b) / img_height) * self.height, self.height),
         ]
 
     def _get_target(self, image: np.array, annot_file_path: str, idx: int):
@@ -79,7 +85,9 @@ class ExDarkDataset(Dataset):
                 object_info = line.strip().split(",")
                 labels.append(int(object_info[0]))
                 boxes.append(
-                    self._get_bbox([float(x) for x in object_info[1:5]], image_width, image_height)
+                    self._get_bbox(
+                        [float(x) for x in object_info[1:5]], image_width, image_height
+                    )
                 )
         boxes = torch.as_tensor(boxes, dtype=torch.float32)
         area = (
@@ -141,9 +149,9 @@ class ExDarkDataset(Dataset):
                 )
                 target["boxes"] = torch.Tensor(sample["bboxes"])
                 image_resized = sample["image"]
-                if np.isnan((target["boxes"]).numpy()).any() or target["boxes"].shape == torch.Size(
-                    [0]
-                ):
+                if np.isnan((target["boxes"]).numpy()).any() or target[
+                    "boxes"
+                ].shape == torch.Size([0]):
                     target["boxes"] = torch.zeros((0, 4), dtype=torch.int64)
             else:
                 sample = self.transforms(image=image_resized)
@@ -152,4 +160,3 @@ class ExDarkDataset(Dataset):
 
     def __len__(self):
         return len(self.all_images)
-

@@ -9,15 +9,11 @@ annotation_dir = sys.argv[4]
 delimiter = sys.argv[5]
 
 
-with open(annotations_info_path, 'r') as f:
+with open(annotations_info_path, "r") as f:
     annotations_info = f.readlines()
 annotations_info = [x.strip() for x in annotations_info[1:]]
 
-train_val_test_map = {
-    "1": "train",
-    "2": "val",
-    "3": "test"
-}
+train_val_test_map = {"1": "train", "2": "val", "3": "test"}
 for dir in train_val_test_map.values():
     os.makedirs(os.path.join(dest_dir, dir), exist_ok=True)
 
@@ -33,7 +29,9 @@ for annotation_info in annotations_info:
     annotaion_name = img_name + ".txt"
     annotation_src_path = os.path.join(annotation_dir, annotaion_name)
 
-    dest_img_path = os.path.join(dest_dir, train_test_val, os.path.basename(annotation_path))
+    dest_img_path = os.path.join(
+        dest_dir, train_test_val, os.path.basename(annotation_path)
+    )
     dest_annotaion_path = os.path.join(dest_dir, train_test_val, annotaion_name)
 
     shutil.copy(img_src_path, dest_img_path)

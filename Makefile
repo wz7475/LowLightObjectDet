@@ -58,3 +58,9 @@ data-full-cleanup:
 
 tests:
 	pytest tests
+
+lint:
+	ruff check exdark tests
+
+format:
+	ruff format exdark tests

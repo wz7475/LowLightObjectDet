@@ -1,5 +1,5 @@
 """
-Module contains ExDarkDataModule which provides interface for ExDark data with necessary tools like transformations 
+Module contains ExDarkDataModule which provides interface for ExDark data with necessary tools like transformations
 and dataloaders based on ExDarkDataset.
 """
 
@@ -9,7 +9,6 @@ from albumentations.pytorch import ToTensorV2
 from lightning.pytorch.utilities.types import TRAIN_DATALOADERS, EVAL_DATALOADERS
 from torch.utils.data import DataLoader
 
-from exdark.config import RESIZE_TO
 from exdark.data.datasets import ExDarkDataset
 
 
@@ -83,12 +82,16 @@ class ExDarkDataModule(L.LightningDataModule):
     @staticmethod
     def get_eval_transformations() -> A.Compose:
         return A.Compose(
-            [ToTensorV2(p=1.0)], bbox_params={"format": "pascal_voc", "label_fields": ["labels"]}
+            [ToTensorV2(p=1.0)],
+            bbox_params={"format": "pascal_voc", "label_fields": ["labels"]},
         )
 
     def setup_predict_data(self, img_dir: str):
         self.predict_datset = ExDarkDataset(
-            img_dir, self.hparams.resize_img_size, self.hparams.resize_img_size, transforms=self.predict_transforms
+            img_dir,
+            self.hparams.resize_img_size,
+            self.hparams.resize_img_size,
+            transforms=self.predict_transforms,
         )
 
     @staticmethod
@@ -107,12 +110,16 @@ class ExDarkDataModule(L.LightningDataModule):
         )
 
     def val_dataloader(self) -> EVAL_DATALOADERS:
-        return DataLoader(self.val_dataset, batch_size=self.batch_size, collate_fn=self._collate_fn)
+        return DataLoader(
+            self.val_dataset, batch_size=self.batch_size, collate_fn=self._collate_fn
+        )
 
     def predict_dataloader(self):
         try:
             return DataLoader(
-                self.predict_datset, batch_size=self.batch_size, collate_fn=self._collate_fn
+                self.predict_datset,
+                batch_size=self.batch_size,
+                collate_fn=self._collate_fn,
             )
         except AttributeError:
             raise PredictionError()

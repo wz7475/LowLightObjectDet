@@ -16,7 +16,9 @@ class COCOWrapperTorchvision(L.LightningModule):
     """
 
     def __init__(
-        self, torchvision_detector: nn.Module, categories_filter: dict = coco2coco_like_exdark
+        self,
+        torchvision_detector: nn.Module,
+        categories_filter: dict = coco2coco_like_exdark,
     ):
         super(COCOWrapperTorchvision, self).__init__()
         self.model = torchvision_detector
@@ -44,7 +46,9 @@ class COCOWrapperTorchvision(L.LightningModule):
             )
         return filtered_detections_list
 
-    def forward(self, images: list[Tensor], targets: Optional[list[dict[str, Tensor]]] = None):
+    def forward(
+        self, images: list[Tensor], targets: Optional[list[dict[str, Tensor]]] = None
+    ):
         outputs = self.model(images, targets)
         return self._filter_detections(outputs)
 

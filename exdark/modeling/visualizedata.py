@@ -9,7 +9,9 @@ class TooManySamplesError(Exception):
     pass
 
 
-@hydra.main(config_path="../../configs", config_name="visualizedata", version_base="1.3")
+@hydra.main(
+    config_path="../../configs", config_name="visualizedata", version_base="1.3"
+)
 def main(cfg: DictConfig):
     datamodule: ExDarkDataModule = hydra.utils.instantiate(cfg.datamodule)
     datamodule.batch_size = 1
@@ -25,6 +27,7 @@ def main(cfg: DictConfig):
         images, targets = next(data_iter)
         draw_bbox_from_targets(images[0], targets[0])
         shown_images += 1
+
 
 if __name__ == "__main__":
     main()

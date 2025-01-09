@@ -33,7 +33,9 @@ class BaseDetectorTorchvision(L.LightningModule):
     def _build_model(self, num_classes: int):
         raise NotImplementedError("Child classes must implement _build_model().")
 
-    def forward(self, images: list[Tensor], targets: Optional[list[dict[str, Tensor]]] = None):
+    def forward(
+        self, images: list[Tensor], targets: Optional[list[dict[str, Tensor]]] = None
+    ):
         return self.model(images, targets)
 
     def predict_step(self, batch, batch_idx, dataloader_idx=0):
@@ -85,7 +87,9 @@ class BaseDetectorTorchvision(L.LightningModule):
                 "lr": self.hparams.lr_backbone,
             },
             {
-                "params": [p for n, p in self.model.named_parameters() if "backbone" not in n],
+                "params": [
+                    p for n, p in self.model.named_parameters() if "backbone" not in n
+                ],
                 "lr": self.hparams.lr_head,
             },
         ]

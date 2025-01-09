@@ -74,14 +74,17 @@ class DetectionTransformer(L.LightningModule):
 
         return coco_annotations
 
-    def forward(self, images: list[Tensor], targets: Optional[list[dict[str, Tensor]]] = None):
+    def forward(
+        self, images: list[Tensor], targets: Optional[list[dict[str, Tensor]]] = None
+    ):
         input_encoding = self.image_processor(
             images=images, annotations=self.pascal_to_coco(targets), return_tensors="pt"
         )
         for key in input_encoding:
             if key == "labels":
                 input_encoding[key] = [
-                    {k: v.to(self.device) for k, v in t.items()} for t in input_encoding["labels"]
+                    {k: v.to(self.device) for k, v in t.items()}
+                    for t in input_encoding["labels"]
                 ]
             else:
                 input_encoding[key] = input_encoding[key].to(self.device)
@@ -151,7 +154,9 @@ class DetectionTransformer(L.LightningModule):
                 "lr": self.hparams.lr_backbone,
             },
             {
-                "params": [p for n, p in self.model.named_parameters() if "backbone" not in n],
+                "params": [
+                    p for n, p in self.model.named_parameters() if "backbone" not in n
+                ],
                 "lr": self.hparams.lr_head,
             },
         ]
