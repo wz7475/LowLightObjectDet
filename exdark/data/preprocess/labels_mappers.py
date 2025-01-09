@@ -1,6 +1,6 @@
 from typing import List, Tuple
 
-from labels_storage import exdark2coco_exceptions
+from exdark.data.preprocess.labels_storage import exdark2coco_exceptions
 
 
 def generate_exdark2coco_mapping(

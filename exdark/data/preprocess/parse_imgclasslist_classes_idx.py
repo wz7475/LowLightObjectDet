@@ -1,8 +1,8 @@
 import os
 
 import pandas as pd
-from labels_mappers import generate_exdark2coco_mapping
-from labels_storage import coco_labels, exdark_custon_labels
+from exdark.data.preprocess.labels_mappers import generate_exdark2coco_mapping
+from exdark.data.preprocess.labels_storage import coco_labels, exdark_custon_labels
 
 
 def parse_image_class_list_txt(
