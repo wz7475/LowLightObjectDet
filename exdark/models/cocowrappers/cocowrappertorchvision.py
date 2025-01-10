@@ -1,11 +1,11 @@
 from typing import Optional
 
 import lightning as L
-import torch
 from torch import nn, Tensor
 from torchmetrics.detection import MeanAveragePrecision
 
 from exdark.data.preprocess.labels_storage import coco2coco_like_exdark
+from exdark.models.cocowrappers.detection_filter import filter_detections
 
 
 class COCOWrapperTorchvision(L.LightningModule):
@@ -19,6 +19,8 @@ class COCOWrapperTorchvision(L.LightningModule):
         self,
         torchvision_detector: nn.Module,
         categories_filter: dict = coco2coco_like_exdark,
+        *args,
+        **kwargs,
     ):
         super(COCOWrapperTorchvision, self).__init__()
         self.model = torchvision_detector
@@ -26,29 +28,9 @@ class COCOWrapperTorchvision(L.LightningModule):
         self.metric = MeanAveragePrecision()
 
     def _filter_detections(self, detections: list[dict]) -> list[dict]:
-        filtered_detections_list = []
-        for detections_dict in detections:
-            filtered_detections_dict = {"boxes": [], "labels": [], "scores": []}
-            for box, label_tensor, score in zip(
-                detections_dict["boxes"],
-                detections_dict["labels"],
-                detections_dict["scores"],
-            ):
-                label = label_tensor.item()
-                if label not in self.categories_filter:
-                    continue
-                label = self.categories_filter[label]
-                filtered_detections_dict["boxes"].append(box.tolist())
-                filtered_detections_dict["labels"].append(label)
-                filtered_detections_dict["scores"].append(score)
-            filtered_detections_list.append(
-                dict((k, torch.tensor(v)) for k, v in filtered_detections_dict.items())
-            )
-        return filtered_detections_list
+        return filter_detections(detections, self.categories_filter)
 
-    def forward(
-        self, images: list[Tensor], targets: Optional[list[dict[str, Tensor]]] = None
-    ):
+    def forward(self, images: list[Tensor], targets: Optional[list[dict[str, Tensor]]] = None):
         outputs = self.model(images, targets)
         return self._filter_detections(outputs)
 
