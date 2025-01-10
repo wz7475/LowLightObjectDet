@@ -8,14 +8,8 @@ from exdark.visulisation.bbox import draw_bbox_from_targets
 class TooManySamplesError(Exception):
     pass
 
-
-@hydra.main(
-    config_path="../../configs", config_name="visualizedata", version_base="1.3"
-)
-def main(cfg: DictConfig):
-    datamodule: ExDarkDataModule = hydra.utils.instantiate(cfg.datamodule)
+def visualize_data(datamodule, num_samples_to_visualize):
     datamodule.batch_size = 1
-    num_samples_to_visualize = cfg.num_samples_to_visualize
     test_dataloader = datamodule.test_dataloader()
     data_iter = iter(test_dataloader)
 
@@ -28,6 +22,17 @@ def main(cfg: DictConfig):
         draw_bbox_from_targets(images[0], targets[0])
         shown_images += 1
 
+@hydra.main(
+    config_path="../../configs", config_name="visualizedata", version_base="1.3"
+)
+def main(cfg: DictConfig):
+    try:
+        datamodule: ExDarkDataModule = hydra.utils.instantiate(cfg.datamodule)
+        visualize_data(datamodule, cfg.num_samples_to_visualize)
+    except TooManySamplesError as e:
+        print(f"Visualization error: {e}")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
 
 if __name__ == "__main__":
     main()

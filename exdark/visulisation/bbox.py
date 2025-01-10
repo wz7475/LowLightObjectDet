@@ -81,8 +81,8 @@ def preprocess_predictions(outputs, threshold):
 
 
 def print_predictions(boxes, scores, pred_classes):
-    for j, (box, score) in enumerate(zip(boxes, scores)):
-        class_name = exdark_coco_like_labels[pred_classes[j]]
+    for idx, (box, score) in enumerate(zip(boxes, scores)):
+        class_name = exdark_coco_like_labels[pred_classes[idx]]
         text_to_write = f"{class_name} {int(score * 100)}%"
         print(text_to_write)
 
@@ -101,7 +101,7 @@ def draw_bbox_from_preds(image_rgb: np.array, boxes, scores, pred_classes):
 def draw_bbox_from_targets(image_tensor, target: dict):
     image_rgb = (
         image_tensor.permute(1, 2, 0).cpu().numpy()
-    )  # Convert tensor to numpy array and change channel order
+    )
     image_bgr = cv2.cvtColor(image_rgb, cv2.COLOR_RGB2BGR)
 
     for box_num in range(len(target["boxes"])):
