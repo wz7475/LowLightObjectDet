@@ -1,15 +1,15 @@
 from typing import Optional
 
-import lightning as L
 import torch
 from lightning.pytorch.utilities.types import STEP_OUTPUT
 from torch import Tensor
 from torchmetrics.detection import MeanAveragePrecision
 
 from exdark.data.preprocess.labels_storage import exdark_coco_like_labels
+from exdark.models.baseexdarkmodel import BaseExDarkModule
 
 
-class BaseDetectorTorchvision(L.LightningModule):
+class BaseDetectorTorchvision(BaseExDarkModule):
     """
     Base class for all detectors that use torchvision models. It provides a common interface for training and evaluation.
     """
@@ -38,9 +38,6 @@ class BaseDetectorTorchvision(L.LightningModule):
     ):
         return self.model(images, targets)
 
-    def predict_step(self, batch, batch_idx, dataloader_idx=0):
-        return self(batch[0])
-
     def training_step(self, batch, batch_idx) -> STEP_OUTPUT:
         images, targets = batch
         loss_dict = self.forward(images, targets)
@@ -52,18 +49,6 @@ class BaseDetectorTorchvision(L.LightningModule):
         images, targets = batch
         preds = self.model(images)
         self.metric.update(preds, targets)
-
-    def test_step(self, batch, batch_idx) -> STEP_OUTPUT:
-        images, targets = batch
-        preds = self.model(images)
-        self.metric.update(preds, targets)
-
-    def on_test_epoch_end(self) -> None:
-        mAP = self.metric.compute()
-        self.log("test_mAP", mAP["map"], prog_bar=True)
-        self.log("test_mAP_50", mAP["map_50"], prog_bar=True)
-        self.log("test_mAP_75", mAP["map_75"], prog_bar=True)
-        self.metric.reset()
 
     def on_validation_epoch_end(self) -> None:
         mAP = self.metric.compute()

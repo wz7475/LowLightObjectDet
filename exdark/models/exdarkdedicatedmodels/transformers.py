@@ -8,9 +8,10 @@ from torchmetrics.detection import MeanAveragePrecision
 from transformers import AutoModelForObjectDetection, AutoImageProcessor
 
 from exdark.data.preprocess.labels_storage import exdark_coco_like_labels
+from exdark.models.baseexdarkmodel import BaseExDarkModule
 
 
-class DetectionTransformer(L.LightningModule):
+class DetectionTransformer(BaseExDarkModule):
     def __init__(
         self,
         transformers_checkpoint: str,
@@ -128,16 +129,6 @@ class DetectionTransformer(L.LightningModule):
         mAP = self.metric.compute()
         self.log("val_mAP", mAP["map"], prog_bar=True)
         self.metric.reset()
-
-    def on_test_epoch_end(self) -> None:
-        mAP = self.metric.compute()
-        self.log("test_mAP", mAP["map"], prog_bar=True)
-        self.log("test_mAP_50", mAP["map_50"], prog_bar=True)
-        self.log("test_mAP_75", mAP["map_75"], prog_bar=True)
-        self.metric.reset()
-
-    def predict_step(self, batch, batch_idx, dataloader_idx=0):
-        return self(batch[0])
 
     def configure_optimizers(self):
         if self.hparams.freeze_backbone:

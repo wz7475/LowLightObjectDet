@@ -8,10 +8,12 @@ from transformers import (
     AutoImageProcessor,
     AutoModelForObjectDetection,
 )
+
+from exdark.models.baseexdarkmodel import BaseExDarkModule
 from exdark.models.cocowrappers.detection_filter import filter_detections
 
 
-class COCOWrapperTransformers(L.LightningModule):
+class COCOWrapperTransformers(BaseExDarkModule):
     """
     COCOWrapperTransformers wraps any Transformers object detection model trained on COCO datasets. After standard
     inference predictions all predictions for categories both present in COCO and ExDark are translated from
@@ -32,7 +34,6 @@ class COCOWrapperTransformers(L.LightningModule):
         )
         self.post_processing_confidence_thr = post_processing_confidence_thr
         self.categories_map = self._get_transformers_coco_to_exdark_mapping()
-        self.metric = MeanAveragePrecision()
 
     def _get_transformers_coco_to_exdark_mapping(self):
         exdark_categories = [
@@ -56,7 +57,11 @@ class COCOWrapperTransformers(L.LightningModule):
         }
 
     def _filter_detections(self, detections: list[dict]) -> list[dict]:
-        return filter_detections(detections, self.categories_map)
+        filtered = filter_detections(detections, self.categories_map)
+        for detection_dict in filtered:
+            for key in detection_dict:
+                detection_dict[key].to(self.device)
+        return filtered
 
     def forward(self, images: list[Tensor], targets: Optional[list[dict[str, Tensor]]] = None):
         input_encoding = self.image_processor(images, return_tensors="pt")
@@ -69,17 +74,3 @@ class COCOWrapperTransformers(L.LightningModule):
         )
         return self._filter_detections(outputs)
 
-    def predict_step(self, batch, batch_idx, dataloader_idx=0):
-        return self(batch[0])
-
-    def test_step(self, batch, batch_idx):
-        images, targets = batch
-        preds = self.forward(images, targets)
-        self.metric.update(preds, targets)
-
-    def on_test_epoch_end(self) -> None:
-        mAP = self.metric.compute()
-        self.log("test_mAP", mAP["map"], prog_bar=True)
-        self.log("test_mAP_50", mAP["map_50"], prog_bar=True)
-        self.log("test_mAP_75", mAP["map_75"], prog_bar=True)
-        self.metric.reset()
