@@ -1,19 +1,17 @@
 from typing import Optional
 
-import lightning as L
 import torch
 from torch import Tensor
-from torchmetrics.detection import MeanAveragePrecision
 from transformers import (
     AutoImageProcessor,
     AutoModelForObjectDetection,
 )
 
-from exdark.models.baseexdarkmodel import BaseExDarkModule
+from exdark.models.cocowrappers.basecocowrapper import BaseCOCOWrapper
 from exdark.models.cocowrappers.detection_filter import filter_detections
 
 
-class COCOWrapperTransformers(BaseExDarkModule):
+class COCOWrapperTransformers(BaseCOCOWrapper):
     """
     COCOWrapperTransformers wraps any Transformers object detection model trained on COCO datasets. After standard
     inference predictions all predictions for categories both present in COCO and ExDark are translated from
@@ -33,9 +31,8 @@ class COCOWrapperTransformers(BaseExDarkModule):
             transformers_detector_tag, do_rescale=False
         )
         self.post_processing_confidence_thr = post_processing_confidence_thr
-        self.categories_map = self._get_transformers_coco_to_exdark_mapping()
 
-    def _get_transformers_coco_to_exdark_mapping(self):
+    def _get_categories_map(self) -> dict:
         exdark_categories = [
             "bicycle",
             "boat",
@@ -56,12 +53,6 @@ class COCOWrapperTransformers(BaseExDarkModule):
             for idx, category_name in enumerate(exdark_categories)
         }
 
-    def _filter_detections(self, detections: list[dict]) -> list[dict]:
-        filtered = filter_detections(detections, self.categories_map)
-        for detection_dict in filtered:
-            for key in detection_dict:
-                detection_dict[key].to(self.device)
-        return filtered
 
     def forward(self, images: list[Tensor], targets: Optional[list[dict[str, Tensor]]] = None):
         input_encoding = self.image_processor(images, return_tensors="pt")
