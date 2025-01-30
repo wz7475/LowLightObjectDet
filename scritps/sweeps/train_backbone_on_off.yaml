@@ -14,11 +14,6 @@ command:
 
 parameters:
   model:
-    values: ["fcos", "retinanet"]
+    values: [ "fasterrcnn", "retinanet", "fcos", "def_detr" ]
   model.freeze_backbone:
-    values: [true, false]
-  datamodule.limit_to_n_samples:
-    values: [5, 10, 50, 75, 100, 200, 3000]
-  datamodule.batch_size:
-    values: [4]
-
+    values: [ false, true ]

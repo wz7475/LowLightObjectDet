@@ -1,0 +1,19 @@
+method: grid
+project: exdark
+metric:
+  name: val_mAP
+  goal: maximize
+
+program: exdark/modeling/eval.py
+
+command:
+  - ${env}
+  - python
+  - ${program}
+  - ${args_no_hyphens}
+
+parameters:
+  model:
+    values: [ "wrapperfasterrcnn", "wrapperretinanet", "wrapperfcos", "wrapperdefdetr" ]
+  datamodule:
+    value: [ "datamodule", "gamma", "hvicid" ]

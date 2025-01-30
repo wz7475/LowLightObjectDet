@@ -1,0 +1,24 @@
+method: grid
+project: exdark
+metric:
+  name: val_mAP
+  goal: maximize
+
+program: exdark/modeling/train.py
+
+command:
+  - ${env}
+  - python
+  - ${program}
+  - ${args_no_hyphens}
+
+parameters:
+  model:
+    values: [ "fasterrcnn", "retinanet", "fcos", "def_detr" ]
+  model.freeze_backbone:
+    values: [true, false]
+  datamodule.limit_to_n_samples:
+    values: [5, 10, 50, 75, 100, 200, 3000]
+  datamodule.batch_size:
+    values: [4]
+
