@@ -1,8 +1,16 @@
+"""
+Script to parse the annotation files from the ExDark dataset and convert the class names to the COCO class names.
+"""
+
 import os
 
 import pandas as pd
 from exdark.data.preprocess.labels_mappers import generate_exdark2coco_mapping
-from exdark.data.preprocess.labels_storage import coco_labels, exdark_custon_labels, exdark_label2idx
+from exdark.data.preprocess.labels_storage import (
+    coco_labels,
+    exdark_custon_labels,
+    exdark_label2idx,
+)
 
 
 def parse_exdark_anno_dir_flat(input_dir: str, output_dir: str, labels_map: dict):

@@ -1,3 +1,8 @@
+"""
+Script to train the models. It uses the hydra framework to load the configuration and instantiate the model, datamodule, and logger.
+The results are logged to logger and printed to the console.
+"""
+
 import hydra
 import lightning as L
 from lightning.pytorch.callbacks import (
@@ -17,6 +22,9 @@ from exdark.modeling.utils import setup_environment
 
 
 def get_callbacks(use_extended_logging: bool):
+    """
+    Get callbacks for the training flow and extended logging if enabled.
+    """
     training_flow_callbacks = [
         EarlyStopping(monitor="val_mAP", mode="max", min_delta=0.01, patience=10),
         LearningRateMonitor(logging_interval="epoch", log_momentum=True),

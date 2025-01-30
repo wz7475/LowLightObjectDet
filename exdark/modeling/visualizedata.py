@@ -1,3 +1,7 @@
+"""
+Script to visualize the data in the ExDark dataset. Version of datamodule is reads from configuration via Hydra.
+"""
+
 import hydra
 from omegaconf import DictConfig
 
@@ -6,7 +10,12 @@ from exdark.visulisation.bbox import draw_bbox_from_targets
 
 
 class TooManySamplesError(Exception):
+    """
+    Exception raised when the number of samples to visualize is greater than the number of samples in the dataset.
+    """
+
     pass
+
 
 def visualize_data(datamodule, num_samples_to_visualize):
     datamodule.batch_size = 1
@@ -22,6 +31,7 @@ def visualize_data(datamodule, num_samples_to_visualize):
         draw_bbox_from_targets(images[0], targets[0])
         shown_images += 1
 
+
 @hydra.main(
     config_path="../../configs", config_name="visualizedata", version_base="1.3"
 )
@@ -33,6 +43,7 @@ def main(cfg: DictConfig):
         print(f"Visualization error: {e}")
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
+
 
 if __name__ == "__main__":
     main()

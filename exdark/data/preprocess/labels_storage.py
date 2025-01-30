@@ -1,3 +1,7 @@
+"""
+This module contains the mapping between the COCO labels and the ExDark labels.
+"""
+
 import torchvision
 
 coco_labels = torchvision.models.detection.SSD300_VGG16_Weights.COCO_V1.meta[

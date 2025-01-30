@@ -1,3 +1,7 @@
+"""
+Module for the detection models trained on COCO.
+"""
+
 from torchvision.models.detection import (
     fasterrcnn_resnet50_fpn_v2,
     FasterRCNN_ResNet50_FPN_V2_Weights,

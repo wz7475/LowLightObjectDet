@@ -1,3 +1,7 @@
+"""
+Script to move all images from a directory tree to a flat directory.
+"""
+
 import os
 import shutil
 import sys

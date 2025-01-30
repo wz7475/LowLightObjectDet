@@ -1,3 +1,7 @@
+"""
+This script is used to parse the image_classlist.txt file and map the classes to the corresponding indexes.
+"""
+
 import os
 
 import pandas as pd

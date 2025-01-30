@@ -1,3 +1,7 @@
+"""
+Module containing function to setup environment for reproducibility.
+"""
+
 import os
 
 import lightning as L

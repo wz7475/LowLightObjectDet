@@ -1,3 +1,7 @@
+"""
+Module for the BaseExDarkModule class.
+"""
+
 from abc import ABC, abstractmethod
 import lightning as L
 from torchmetrics.detection import MeanAveragePrecision

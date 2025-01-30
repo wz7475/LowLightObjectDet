@@ -1,3 +1,8 @@
+"""
+Inference script for object detection. It uses the hydra framework to load model and path to images.
+The model is then used to predict on the images and the results are visualized or printed to the console.
+"""
+
 import glob as glob
 import os.path
 from typing import Literal
@@ -18,6 +23,10 @@ from exdark.visulisation.bbox import (
 
 
 class InferenceDataset(torch.utils.data.Dataset):
+    """
+    Dataset class for inference.
+    """
+
     def __init__(self, img_paths: list[str]):
         self.img_paths = img_paths
 

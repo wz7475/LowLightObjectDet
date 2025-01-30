@@ -1,3 +1,7 @@
+"""
+Module with utility functions to draw bounding boxes.
+"""
+
 import cv2
 import numpy as np
 
@@ -99,9 +103,7 @@ def draw_bbox_from_preds(image_rgb: np.array, boxes, scores, pred_classes):
 
 
 def draw_bbox_from_targets(image_tensor, target: dict):
-    image_rgb = (
-        image_tensor.permute(1, 2, 0).cpu().numpy()
-    )
+    image_rgb = image_tensor.permute(1, 2, 0).cpu().numpy()
     image_bgr = cv2.cvtColor(image_rgb, cv2.COLOR_RGB2BGR)
 
     for box_num in range(len(target["boxes"])):

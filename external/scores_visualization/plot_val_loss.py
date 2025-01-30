@@ -1,3 +1,7 @@
+"""
+Script for reading s a CSV file containing validation mAP data for various models and plots the validation mAP across epochs.
+"""
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import argparse

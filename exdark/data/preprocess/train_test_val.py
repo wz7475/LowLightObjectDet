@@ -1,3 +1,7 @@
+"""
+This script is used to split the ExDark dataset into train, val, and test sets.
+"""
+
 import os
 import shutil
 import sys

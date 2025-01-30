@@ -1,3 +1,7 @@
+"""
+Script to plot test mAP by dataset size, model, and backbone freezing status.
+"""
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np

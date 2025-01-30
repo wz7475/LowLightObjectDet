@@ -1,3 +1,8 @@
+"""
+This script is used to evaluate the model on the test set. It uses the hydra framework to load the configuration and instantiate the model, datamodule, and logger.
+The results are logged to logger and printed to the console.
+"""
+
 import hydra
 import lightning as L
 from omegaconf import DictConfig

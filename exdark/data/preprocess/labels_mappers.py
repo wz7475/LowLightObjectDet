@@ -1,3 +1,7 @@
+"""
+Module with function to generate mapping between ExDark and COCO categories.
+"""
+
 from typing import List, Tuple
 
 from exdark.data.preprocess.labels_storage import exdark2coco_exceptions

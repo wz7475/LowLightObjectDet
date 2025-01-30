@@ -1,3 +1,7 @@
+"""
+This script is used to convert all file names in a directory to lowercase.
+"""
+
 import os
 import sys
 

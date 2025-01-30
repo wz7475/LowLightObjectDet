@@ -1,3 +1,7 @@
+"""
+Module for the BaseCOCOWrapper class.
+"""
+
 from abc import ABC, abstractmethod
 
 from exdark.models.baseexdarkmodel import BaseExDarkModule
@@ -5,6 +9,9 @@ from exdark.models.cocowrappers.detection_filter import filter_detections
 
 
 class BaseCOCOWrapper(BaseExDarkModule, ABC):
+    """
+    Base class for COCO wrappers. It provides a common interface for all COCO wrappers.
+    """
 
     @abstractmethod
     def _get_categories_map(self) -> dict:

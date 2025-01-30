@@ -26,7 +26,9 @@ class COCOWrapperTransformers(BaseCOCOWrapper):
         **kwargs,
     ):
         super(COCOWrapperTransformers, self).__init__()
-        self.model = AutoModelForObjectDetection.from_pretrained(transformers_detector_tag)
+        self.model = AutoModelForObjectDetection.from_pretrained(
+            transformers_detector_tag
+        )
         self.image_processor = AutoImageProcessor.from_pretrained(
             transformers_detector_tag, do_rescale=False
         )
@@ -53,8 +55,9 @@ class COCOWrapperTransformers(BaseCOCOWrapper):
             for idx, category_name in enumerate(exdark_categories)
         }
 
-
-    def forward(self, images: list[Tensor], targets: Optional[list[dict[str, Tensor]]] = None):
+    def forward(
+        self, images: list[Tensor], targets: Optional[list[dict[str, Tensor]]] = None
+    ):
         input_encoding = self.image_processor(images, return_tensors="pt")
         input_encoding = {k: v.to(self.device) for k, v in input_encoding.items()}
         output_encoding = self.model(**input_encoding)
@@ -64,4 +67,3 @@ class COCOWrapperTransformers(BaseCOCOWrapper):
             threshold=self.post_processing_confidence_thr,
         )
         return self._filter_detections(outputs)
-

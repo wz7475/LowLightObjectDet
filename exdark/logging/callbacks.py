@@ -4,6 +4,10 @@ import pytorch_lightning as pl
 
 
 class LogTransformationCallback(Callback):
+    """
+    Callback to log transformations used in the model.
+    """
+
     def on_fit_start(
         self, trainer: "pl.Trainer", pl_module: "pl.LightningModule"
     ) -> None:
@@ -49,6 +53,10 @@ class LogTransformationCallback(Callback):
 
 
 class LogDataModuleCallback(Callback):
+    """
+    Callback to log datamodule hyperparameters.
+    """
+
     def on_fit_start(self, trainer, pl_module):
         datamodule = trainer.datamodule
         pl_module.logger.log_hyperparams(
@@ -61,5 +69,9 @@ class LogDataModuleCallback(Callback):
 
 
 class LogModelCallback(Callback):
+    """
+    Callback to log model hyperparameters.
+    """
+
     def on_fit_start(self, trainer, pl_module):
         pl_module.logger.log_hyperparams({"model": pl_module.model.__class__.__name__})
