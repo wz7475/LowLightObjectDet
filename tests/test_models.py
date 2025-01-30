@@ -19,7 +19,9 @@ def mock_dataloader():
     return images, targets
 
 
-PREDEFINED_PREDICTIONS = [
+CATEGORIES_MAP = {1: 1, 2: 2, 3: 3, 4: 4}
+
+PREDEFINED_PREDICTIONS_1_MAP = [
     {
         "boxes": torch.tensor([[10, 10, 50, 50]]),
         "labels": torch.tensor([1]),
@@ -42,40 +44,81 @@ PREDEFINED_PREDICTIONS = [
     },
 ]
 
+PREDEFINED_PREDICTIONS_1_MAP50 = [
+    {
+        "boxes": torch.tensor([[10, 10, 50, 31]]),
+        "labels": torch.tensor([1]),
+        "scores": torch.tensor([0.9]),
+    },
+    {
+        "boxes": torch.tensor([[20, 20, 60, 41]]),
+        "labels": torch.tensor([2]),
+        "scores": torch.tensor([0.8]),
+    },
+    {
+        "boxes": torch.tensor([[30, 30, 70, 51]]),
+        "labels": torch.tensor([3]),
+        "scores": torch.tensor([0.7]),
+    },
+    {
+        "boxes": torch.tensor([[40, 40, 80, 61]]),
+        "labels": torch.tensor([4]),
+        "scores": torch.tensor([0.6]),
+    },
+]
+
 
 @pytest.fixture
-def mock_torchvision_model():
-    model = MagicMock()
-    model.return_value = PREDEFINED_PREDICTIONS
-    return model
-
-
-@pytest.fixture
-def mock_transformers_wrapper():
+def mock_transformerswrapper(request):
+    predictions, categories = request.param
     wrapper = COCOWrapperTransformers()
-    wrapper.categories_map = {1: 1, 2: 2, 3: 3, 4: 4}
+    wrapper._get_categories_map = lambda: categories
     wrapper.image_processor = MagicMock()
-    wrapper.image_processor.post_process_object_detection.return_value = (
-        PREDEFINED_PREDICTIONS
-    )
+    wrapper.image_processor.post_process_object_detection.return_value = predictions
     wrapper.image_processor.return_value = {"pixel_values": torch.rand(1, 3, 224, 224)}
     return wrapper
 
 
 @pytest.fixture
-def mock_lightning_torchvsionwrapper(mock_torchvision_model):
-    wrapper = COCOWrapperTorchvision(mock_torchvision_model)
-    wrapper.categories_filter = {1: 1, 2: 2, 3: 3, 4: 4}
+def mock_torchvisionwrapper(request):
+    predictions, categories = request.param
+    base_mock_torchvision_model = MagicMock()
+    base_mock_torchvision_model.return_value = predictions
+    wrapper = COCOWrapperTorchvision(base_mock_torchvision_model)
+    wrapper.categories_filter = categories
     return wrapper
 
 
-def test_50_map(mock_dataloader, mock_lightning_torchvsionwrapper):
+@pytest.mark.parametrize(
+    "mock_torchvisionwrapper,expected_map,expected_map50",
+    [
+        ((PREDEFINED_PREDICTIONS_1_MAP, CATEGORIES_MAP), 1, 1),
+        ((PREDEFINED_PREDICTIONS_1_MAP50, CATEGORIES_MAP), 0.1, 1),
+    ],
+    indirect=["mock_torchvisionwrapper"],
+)
+def test_torchvision_metrics(
+    mock_dataloader, mock_torchvisionwrapper, expected_map, expected_map50
+):
     images, targets = mock_dataloader
-    mock_lightning_torchvsionwrapper.test_step((images, targets), 0)
-    assert mock_lightning_torchvsionwrapper.metric.compute()["map_50"] == 1
+    mock_torchvisionwrapper.test_step((images, targets), 0)
+    metrics = mock_torchvisionwrapper.metric.compute()
+    assert metrics["map_50"] == expected_map50
+    assert metrics["map"] == expected_map
 
 
-def test_transformers_50_map(mock_dataloader, mock_transformers_wrapper):
+@pytest.mark.parametrize(
+    "mock_transformerswrapper,expected_map,expected_map50",
+    [
+        ((PREDEFINED_PREDICTIONS_1_MAP, CATEGORIES_MAP), 1, 1),
+        ((PREDEFINED_PREDICTIONS_1_MAP50, CATEGORIES_MAP), 0.1, 1),
+    ],
+    indirect=["mock_transformerswrapper"],
+)
+def test_transformers_50_map(
+    mock_dataloader, mock_transformerswrapper, expected_map, expected_map50
+):
     images, targets = mock_dataloader
-    mock_transformers_wrapper.test_step((images, targets), 0)
-    assert mock_transformers_wrapper.metric.compute()["map_50"] == 1
+    mock_transformerswrapper.test_step((images, targets), 0)
+    assert mock_transformerswrapper.metric.compute()["map_50"] == expected_map50
+    assert mock_transformerswrapper.metric.compute()["map"] == expected_map
