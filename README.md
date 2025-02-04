@@ -67,7 +67,9 @@ Fine-tuning various object detectors on ExDark (with and without LLIE):
 ### Installation
 Python 3.10 or higher is required.
 1. Install dependencies using [PDM](https://pdm-project.org/en/latest/) `pdm install` or `pip install .`
-2. Set up data via `make setup-data`
+2. Set up data via `make data-setup`
+3. If you want to use W&B logger, create `.env` file similar to `.env_example`
+and insert your token; then run `set -a && source .env && set +a` (add flag `logger=csv` to use offline csv logger instead of W&B)
 
 ### Details about configuration
 Configuration is powered by [Hydra](https://hydra.cc/docs/intro/). For more details, check the sections on [running experiments](#running-experiments) and [inference](#inference). For more information, visit the [Hydra documentation](https://hydra.cc/docs/intro/).
