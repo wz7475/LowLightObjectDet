@@ -17,7 +17,7 @@
 
 ## Overview
 
-Benchmark for objectively comparing
+Benchmark comparing
 object detection methods under low-light conditions across various object detection
 deep learning architectures, focusing on application of low-light image enhancement
 techniques and fine-tuning.
@@ -41,7 +41,7 @@ Fine-tuning various object detectors on ExDark (with and without LLIE):
   - FCOS
   - Deformable DETR
 
-### Scores
+### Results and insights
 | Method | Faster R-CNN |  | FCOS |  | RetinaNet |  | Def. DETR |  |
 |--------|--------------|--------------|--------|--------|------------|------------|------------|------------|
 |  | mAP | mAP@50 | mAP | mAP@50 | mAP | mAP@50 | mAP | mAP@50 |
@@ -51,7 +51,9 @@ Fine-tuning various object detectors on ExDark (with and without LLIE):
 | Gamma - fine-tuned | 45.6 | 74.5 | 36.7 | 60.3 | 24.0 | 41.2 | n/a | n/a |
 | HVI-CID - baseline | 29.9 | 58.64 | 25.3 | 49.4 | 26.6 | 52.3 | 17.9 | 33.8 |
 | HVI-CID - fine-tuned | 43.5 | 72.5 | 35.6 | 59.3 | 8.1 | 14.9 | n/a | n/a |
-
+1. **Lack of robustness of detection models** against low-light conditions
+2. The **adaptation of feature extractor** of detection models is key for object detection under low-light conditions
+3. **Fine-tuning >> LLIE** - The superiority of fine-tuning of detection model over low-light image enhancement techniques
 
 ## User guide and contribution
 ### Project structure
