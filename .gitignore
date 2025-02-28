@@ -20,3 +20,6 @@ wandb
 .hydra
 train.log
 wandb_logs
+csv_logs
+wandb_artifacts_sandbox
+

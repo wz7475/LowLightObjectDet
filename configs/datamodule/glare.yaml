@@ -1,0 +1,8 @@
+_target_: exdark.data.datamodules.exdarkdatamodule.ExDarkDataModule
+batch_size: 16
+train_set_path: "data/dataset/glare/train_glare"
+val_set_path: "data/dataset/glare/val_glare"
+test_set_path: "data/dataset/glare/test_glare"
+resize_img_size: 640
+limit_to_n_samples: null
+use_augmentations: true

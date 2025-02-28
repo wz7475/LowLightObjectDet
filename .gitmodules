@@ -1,3 +1,6 @@
 [submodule "HVI-CIDNet-inference"]
 	path = external/HVI-CIDNet-inference
 	url = git@github.com:wz7475/HVI-CIDNet-inference.git
+[submodule "GLARE-inference"]
+	path = external/GLARE-inference
+	url = git@github.com:wz7475/GLARE-inference.git
