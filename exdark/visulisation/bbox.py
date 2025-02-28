@@ -19,7 +19,7 @@ COLORS.append([255, 0, 255])
 COLORS.append([128, 0, 0])
 COLORS.append([128, 128, 0])
 COLORS.append([255, 128, 0])
-COLORS.append([128, 0, 128])
+COLORS.append([128, 0, 255])
 COLORS.append([0, 128, 128])
 COLORS.append([192, 192, 192])
 COLORS.append([128, 128, 128])
@@ -58,7 +58,7 @@ def draw_bbox(img, bbox_pascal_voc, color=(0, 0, 255)):
         (int(bbox_pascal_voc[0]), int(bbox_pascal_voc[1])),
         (int(bbox_pascal_voc[2]), int(bbox_pascal_voc[3])),
         color,
-        1,
+        3,
     )
 
 
@@ -96,7 +96,9 @@ def draw_bbox_from_preds(image_rgb: np.array, boxes, scores, pred_classes):
     for j, (box, score) in enumerate(zip(boxes, scores)):
         class_name = exdark_coco_like_labels[pred_classes[j]]
         text_to_write = f"{class_name} {int(score * 100)}%"
-        color = COLORS[CLASSES_COCO.index(class_name) % NUM_CLASSES_EXDARK]
+        color_idx = CLASSES_COCO.index(class_name) % NUM_CLASSES_EXDARK
+        color = COLORS[color_idx]
+        print(class_name, color, color_idx)
         draw_bbox_with_text(image_bgr, box, text_to_write, color)
     cv2.imshow("Prediction", image_bgr)
     cv2.waitKey(0)
