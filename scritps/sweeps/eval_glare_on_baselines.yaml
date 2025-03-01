@@ -4,7 +4,7 @@ metric:
   name: val_mAP
   goal: maximize
 
-program: exdark/modeling/train.py
+program: exdark/modeling/eval.py
 
 command:
   - ${env}
@@ -14,6 +14,6 @@ command:
 
 parameters:
   model:
-    values: [ "fasterrcnn", "retinanet", "fcos", "def_detr" ]
+    values: [ "wrapperfasterrcnn", "wrapperretinanet", "wrapperfcos", "wrapperdefdetr" ]
   datamodule:
-    values: [ "glare" ]
+    value: [ "datamodule", "gamma", "hvicid" ]
