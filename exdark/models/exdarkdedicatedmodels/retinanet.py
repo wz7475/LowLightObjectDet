@@ -21,6 +21,7 @@ class Retina(BaseDetectorTorchvision):
         lr_backbone: float = 0.0005,
         freeze_backbone: bool = False,
         use_extended_logging: bool = False,
+        use_pretrained_weights: bool = True,
     ):
         super(Retina, self).__init__(
             optimizer,
@@ -30,11 +31,12 @@ class Retina(BaseDetectorTorchvision):
             lr_backbone,
             freeze_backbone,
             use_extended_logging,
+            use_pretrained_weights,
         )
 
     def _build_model(self, num_classes):
         model = torchvision.models.detection.retinanet_resnet50_fpn_v2(
-            weights=RetinaNet_ResNet50_FPN_V2_Weights.COCO_V1
+            weights=RetinaNet_ResNet50_FPN_V2_Weights.COCO_V1 if self.hparams.use_pretrained_weights else None
         )
         num_anchors = model.head.classification_head.num_anchors
         model.head.classification_head = RetinaNetClassificationHead(

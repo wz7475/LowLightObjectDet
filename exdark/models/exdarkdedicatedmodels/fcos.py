@@ -20,6 +20,7 @@ class Fcos(BaseDetectorTorchvision):
         lr_backbone: float = 0.0005,
         freeze_backbone: bool = False,
         use_extended_logging: bool = False,
+        use_pretrained_weights: bool = True,
     ):
         super(Fcos, self).__init__(
             optimizer,
@@ -29,10 +30,13 @@ class Fcos(BaseDetectorTorchvision):
             lr_backbone,
             freeze_backbone,
             use_extended_logging,
+            use_pretrained_weights,
         )
 
     def _build_model(self, num_classes):
-        model = torchvision.models.detection.fcos_resnet50_fpn(weights="DEFAULT")
+        model = torchvision.models.detection.fcos_resnet50_fpn(
+            weights="DEFAULT" if self.hparams.use_pretrained_weights else None
+        )
         num_anchors = model.head.classification_head.num_anchors
         model.head.classification_head = FCOSClassificationHead(
             in_channels=256,

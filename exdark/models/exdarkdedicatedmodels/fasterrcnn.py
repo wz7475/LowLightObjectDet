@@ -22,6 +22,7 @@ class FasterRCNN(BaseDetectorTorchvision):
         lr_backbone: float = 0.0005,
         freeze_backbone: bool = False,
         use_extended_logging: bool = False,
+        use_pretrained_weights: bool = True,
     ):
         super(FasterRCNN, self).__init__(
             optimizer,
@@ -31,12 +32,15 @@ class FasterRCNN(BaseDetectorTorchvision):
             lr_backbone,
             freeze_backbone,
             use_extended_logging,
+            use_pretrained_weights,
         )
 
     def _build_model(self, num_classes):
         # get pre-trained model
         model = torchvision.models.detection.fasterrcnn_resnet50_fpn_v2(
             weights=torchvision.models.detection.FasterRCNN_ResNet50_FPN_V2_Weights.DEFAULT
+            if self.hparams.use_pretrained_weights
+            else None
         )
         # replace head for different num of classes
         in_features = model.roi_heads.box_predictor.cls_score.in_features

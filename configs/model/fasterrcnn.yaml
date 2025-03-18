@@ -12,3 +12,4 @@ scheduler:
 lr_head: 0.005
 lr_backbone: 0.0005
 freeze_backbone: false
+use_pretrained_weights: true

@@ -23,6 +23,7 @@ class BaseDetectorTorchvision(BaseExDarkModule):
         lr_backbone: float = 0.0005,
         freeze_backbone: bool = False,
         use_extended_logging: bool = False,
+        use_pretrained_weights: bool = True,
     ):
         super(BaseDetectorTorchvision, self).__init__()
         self.save_hyperparameters(logger=use_extended_logging)
